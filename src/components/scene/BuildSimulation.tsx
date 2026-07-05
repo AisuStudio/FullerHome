@@ -3,7 +3,7 @@
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import RobotArm, { RobotArmHandle, RobotPose, HOME_POSE, solveIK } from "./RobotArm";
+import RobotArm, { RobotArmHandle, RobotPose, HOME_POSE, EXIT_POSE, solveIK } from "./RobotArm";
 import { useSimStore } from "@/lib/store";
 import { Plate } from "@/lib/shell/types";
 
@@ -135,13 +135,22 @@ export default function BuildSimulation() {
     if (phase !== "building" || !currentPlate || paused) {
       // park at home, then slowly ride the rail out through the door
       if (phase === "done") {
-        currentPose.current = lerpPose(currentPose.current, HOME_POSE, Math.min(1, dt * 1.5));
+        // fold flat first — the door opening is only ~2m tall
+        currentPose.current = lerpPose(currentPose.current, EXIT_POSE, Math.min(1, dt * 1.5));
+        const folded =
+          Math.abs(currentPose.current.mastHeight - EXIT_POSE.mastHeight) < 0.08 &&
+          Math.abs(currentPose.current.shoulder - EXIT_POSE.shoulder) < 0.08 &&
+          Math.abs(currentPose.current.elbow - EXIT_POSE.elbow) < 0.12;
+
         const maxExit = design.config.radius + 2.5;
-        if (exitDist.current < maxExit) {
+        if (baseRef.current) baseRef.current.rotation.y = Math.atan2(doorDir.x, doorDir.z);
+        if (folded && exitDist.current < maxExit) {
           exitDist.current = Math.min(maxExit, exitDist.current + dt * 0.5);
           baseRef.current?.position.copy(doorDir.clone().multiplyScalar(exitDist.current));
-          // face the direction of travel
-          if (baseRef.current) baseRef.current.rotation.y = Math.atan2(doorDir.x, doorDir.z);
+          if (exitDist.current >= maxExit) {
+            // robot is out — the door element gets installed behind it
+            useSimStore.getState().setExitDone();
+          }
         }
       } else if (phase === "planning" && exitDist.current !== 0) {
         exitDist.current = 0;

@@ -23,9 +23,12 @@ interface SimState {
   cursor: number;
   speed: number;
   paused: boolean;
+  /** true once the robot has ridden the rail out — door element installs after */
+  exitDone: boolean;
 
   setBudget: (budget: number) => void;
   setHouseType: (t: HouseType) => void;
+  setExitDone: () => void;
   startDelivery: () => void;
   startBuild: () => void;
   placeNext: () => void;
@@ -52,16 +55,19 @@ export const useSimStore = create<SimState>((set, get) => ({
   cursor: 0,
   speed: 3,
   paused: false,
+  exitDone: false,
 
   setBudget: (budget) => {
     if (get().phase !== "planning") return;
-    set({ budget, ...build(budget, get().houseType), cursor: 0 });
+    set({ budget, ...build(budget, get().houseType), cursor: 0, exitDone: false });
   },
 
   setHouseType: (houseType) => {
     if (get().phase !== "planning") return;
-    set({ houseType, ...build(get().budget, houseType), cursor: 0 });
+    set({ houseType, ...build(get().budget, houseType), cursor: 0, exitDone: false });
   },
+
+  setExitDone: () => set({ exitDone: true }),
 
   startDelivery: () => set({ phase: "delivery" }),
   startBuild: () => set({ phase: "building", paused: false }),
@@ -79,5 +85,5 @@ export const useSimStore = create<SimState>((set, get) => ({
   setSpeed: (s) => set({ speed: s }),
   togglePause: () => set((st) => ({ paused: !st.paused })),
 
-  reset: () => set({ phase: "planning", cursor: 0, paused: false }),
+  reset: () => set({ phase: "planning", cursor: 0, paused: false, exitDone: false }),
 }));

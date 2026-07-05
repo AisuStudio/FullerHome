@@ -60,6 +60,52 @@ export default function HomePage() {
             factory. No heavy haulage, no crane logistics for oversized modules.
           </p>
 
+          <h2>Why &ldquo;FullerHome&rdquo;?</h2>
+          <p>
+            The name honors <strong>Richard Buckminster Fuller</strong> (1895–1983), who
+            popularized the geodesic dome in the late 1940s. Fuller&rsquo;s obsession was
+            &ldquo;doing more with less&rdquo;: a sphere encloses the most volume with the
+            least surface, and a geodesic lattice distributes loads so evenly that the
+            structure needs no columns, no beams, no load-bearing interior walls. His
+            vision went further than geometry — he imagined mass-produced,
+            air-deliverable homes (the Dymaxion House) decades before anyone spoke of
+            prefabrication or serial building. A robot that assembles a dome on site from
+            a flat-pack of plates is arguably closer to Fuller&rsquo;s original idea than
+            most things built in his lifetime.
+          </p>
+
+          <div className={styles.cardGrid}>
+            <div className={styles.card}>
+              <h3>Where domes shine</h3>
+              <p>
+                ~30% less envelope surface per m³ than a box — less material, less heat
+                loss. Aerodynamic in storms and snow. Column-free span, ideal for open
+                plans, workshops, greenhouses, event and community spaces. Strongest
+                structure per kilogram of material we know how to build.
+              </p>
+            </div>
+            <div className={styles.card}>
+              <h3>Where they struggle</h3>
+              <p>
+                Curved walls fight rectangular life: furniture, kitchens, standard
+                windows and doors all assume right angles. Every plate is unique — no
+                standard parts (exactly the problem robotic fabrication solves). Interior
+                partitioning wastes the open span, acoustics can be lively, and resale
+                markets are conservative.
+              </p>
+            </div>
+            <div className={styles.card}>
+              <h3>The sweet spot</h3>
+              <p>
+                Domes make most sense where their strengths matter and their weaknesses
+                don&rsquo;t: studios, workshops, holiday homes, off-grid and disaster-relief
+                housing, garden buildings — and in clusters, where several small domes
+                form a village and each dome hosts one function instead of forcing
+                room-partitions into curved geometry.
+              </p>
+            </div>
+          </div>
+
           <h2>How the simulation works</h2>
           <div className={styles.cardGrid}>
             <div className={styles.card}>

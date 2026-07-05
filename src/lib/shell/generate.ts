@@ -356,8 +356,23 @@ export function generateShell(partial?: Partial<ShellConfig>): ShellDesign {
       ? p
       : best
   );
-  // the door is INSET into this plate (plate still gets built — no hole)
+  // entrance opening: two plates high (ring 0 + the one above) — stays open as
+  // the robot's exit passage; a straight vertical portal (dormer) is installed
+  // in front of it afterwards. Curved plates can't be fitted from outside.
   doorPlate.isDoor = true;
+  doorPlate.material = "glass";
+  const above = doorPlate.neighbors
+    .map((n) => plates[n])
+    .filter((p) => p.ring === 1)
+    .sort(
+      (a, b) =>
+        dot(norm({ x: b.centroid.x, y: 0, z: b.centroid.z }), doorDir) -
+        dot(norm({ x: a.centroid.x, y: 0, z: a.centroid.z }), doorDir)
+    )[0];
+  if (above) {
+    above.isDoor = true;
+    above.material = "glass";
+  }
 
   // glass plates: deterministic, south-biased (toward doorAngle+PI is "garden side")
   const candidates = plates.filter((p) => !p.isDoor && p.ring >= 1);

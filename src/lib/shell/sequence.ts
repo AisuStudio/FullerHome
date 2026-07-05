@@ -9,7 +9,11 @@ import { BuildStep, ShellDesign } from "./types";
 export function sequenceBuild(design: ShellDesign): BuildStep[] {
   const { plates } = design;
   const placed = new Set<number>();
-  const remaining = new Set<number>(plates.map((p) => p.id));
+  // the door plate stays open as the robot's exit passage — it gets installed
+  // from outside after the robot has left the building
+  const remaining = new Set<number>(
+    plates.filter((p) => !p.isDoor).map((p) => p.id)
+  );
   const steps: BuildStep[] = [];
 
   const angleOf = (id: number) => {
@@ -59,8 +63,9 @@ export function validateSequence(design: ShellDesign, steps: BuildStep[]): strin
   const errors: string[] = [];
   const placed = new Set<number>();
 
-  if (steps.length !== plates.length) {
-    errors.push(`step count ${steps.length} != plates ${plates.length}`);
+  const buildable = plates.filter((p) => !p.isDoor).length;
+  if (steps.length !== buildable) {
+    errors.push(`step count ${steps.length} != buildable plates ${buildable}`);
   }
 
   let maxRingSeen = 0;

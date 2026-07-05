@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import * as THREE from "three";
 import { Plate, ShellDesign, BuildStep } from "@/lib/shell/types";
+import { useSimStore } from "@/lib/store";
 
 // ---------------------------------------------------------------------------
 // Renders the plate shell. Placed plates are solid; unplaced ones show as a
@@ -42,6 +43,8 @@ export default function ShellStructure({
   cursor,
   showBlueprint,
 }: ShellStructureProps) {
+  const exitDone = useSimStore((s) => s.exitDone);
+
   const geometries = useMemo(
     () => design.plates.map((p) => plateGeometry(p)),
     [design]
@@ -56,6 +59,16 @@ export default function ShellStructure({
   return (
     <group>
       {design.plates.map((plate) => {
+        // door plates stay open as the robot's exit passage — the straight
+        // portal vestibule (DoorAndInterior) replaces them after the exit
+        if (plate.isDoor) {
+          if (exitDone || !showBlueprint) return null;
+          return (
+            <mesh key={plate.id} geometry={geometries[plate.id]}>
+              <meshBasicMaterial color="#1f1934" wireframe transparent opacity={0.22} />
+            </mesh>
+          );
+        }
         const placed = placedIds.has(plate.id);
 
         if (!placed && !showBlueprint) return null;

@@ -26,16 +26,9 @@ export default function DoorAndInterior() {
     return { angle, r };
   }, [design]);
 
-  // door + interior appear once ring 0+1 are complete (opening is framed)
-  const ringsDone = useMemo(() => {
-    let maxRing = -1;
-    for (let i = 0; i < cursor && i < steps.length; i++) {
-      maxRing = Math.max(maxRing, steps[i].ring);
-    }
-    return maxRing;
-  }, [cursor, steps]);
-
-  const showDoor = phase === "done" || ringsDone >= 2;
+  // door frame + leaf install together with the door plate, after the robot left
+  const exitDone = useSimStore((s) => s.exitDone);
+  const showDoor = exitDone;
   const showInterior = cursor > 0;
   const buildRatio = steps.length > 0 ? cursor / steps.length : 0;
   const glassFront = design.glassFront;
@@ -45,8 +38,8 @@ export default function DoorAndInterior() {
   if (!doorInfo) return null;
 
   const { angle, r } = doorInfo;
-  // just inside the door plate, so frame+leaf sit flush in the shell
-  const doorDist = r * 0.88;
+  // vestibule straddles the shell surface (front face protrudes outside)
+  const doorDist = r * 0.96;
   const doorW = 1.15;
   const doorH = 2.15;
   const frameT = 0.09;
@@ -159,48 +152,100 @@ export default function DoorAndInterior() {
         );
       })()}
 
-      {/* the door itself */}
+      {/* straight portal vestibule (dormer) — installed from outside after the
+          robot has exited; covers the two-plate-high opening */}
       {showDoor && (
         <group
           position={[Math.sin(angle) * doorDist, 0, Math.cos(angle) * doorDist]}
           rotation={[0, angle, 0]}
         >
-          {/* frame: two posts + lintel */}
-          {[-doorW / 2, doorW / 2].map((x) => (
-            <mesh key={x} position={[x, doorH / 2, 0]} castShadow>
-              <boxGeometry args={[frameT, doorH, frameT * 2.4]} />
-              <meshStandardMaterial color="#6B4A26" roughness={0.7} />
-            </mesh>
-          ))}
-          <mesh position={[0, doorH + frameT / 2, 0]} castShadow>
-            <boxGeometry args={[doorW + frameT, frameT, frameT * 2.4]} />
-            <meshStandardMaterial color="#6B4A26" roughness={0.7} />
-          </mesh>
-
-          {/* glass leaf, slightly ajar */}
-          <group position={[-doorW / 2 + frameT / 2, 0, 0]} rotation={[0, phase === "done" ? -0.5 : 0, 0]}>
-            <mesh position={[(doorW - frameT) / 2, doorH / 2, 0]} castShadow>
-              <boxGeometry args={[doorW - frameT, doorH - 0.04, 0.05]} />
+          {(() => {
+            const pw = 2.6; // portal width — overlaps the opening rim
+            const ph = 2.8; // portal height
+            const pd = 1.1; // depth, straddling the shell surface
+            const post = 0.14;
+            const wood = <meshStandardMaterial color="#6B4A26" roughness={0.7} />;
+            const glass = (
               <meshPhysicalMaterial
                 color="#cfe4f0"
                 transparent
-                opacity={0.4}
+                opacity={0.38}
                 roughness={0.05}
                 side={THREE.DoubleSide}
               />
-            </mesh>
-            {/* handle */}
-            <mesh position={[doorW - frameT - 0.12, doorH * 0.48, 0.06]}>
-              <boxGeometry args={[0.04, 0.22, 0.03]} />
-              <meshStandardMaterial color="#222" metalness={0.9} roughness={0.2} />
-            </mesh>
-          </group>
-
-          {/* threshold */}
-          <mesh position={[0, 0.02, 0]} receiveShadow>
-            <boxGeometry args={[doorW + frameT * 2, 0.05, 0.5]} />
-            <meshStandardMaterial color="#8a6a3a" roughness={0.8} />
-          </mesh>
+            );
+            return (
+              <>
+                {/* corner posts */}
+                {[-pw / 2, pw / 2].map((x) =>
+                  [-pd / 2, pd / 2].map((z) => (
+                    <mesh key={`${x},${z}`} position={[x, ph / 2, z]} castShadow>
+                      <boxGeometry args={[post, ph, post]} />
+                      {wood}
+                    </mesh>
+                  ))
+                )}
+                {/* flat roof */}
+                <mesh position={[0, ph + 0.05, 0]} castShadow>
+                  <boxGeometry args={[pw + 0.3, 0.12, pd + 0.3]} />
+                  {wood}
+                </mesh>
+                {/* side glass walls */}
+                {[-pw / 2, pw / 2].map((x) => (
+                  <mesh key={x} position={[x, ph / 2, 0]} castShadow>
+                    <boxGeometry args={[0.05, ph - 0.1, pd - post]} />
+                    {glass}
+                  </mesh>
+                ))}
+                {/* front face: sidelights + door frame */}
+                {[-1, 1].map((s) => (
+                  <mesh
+                    key={s}
+                    position={[s * (pw / 4 + doorW / 4), ph / 2, pd / 2]}
+                    castShadow
+                  >
+                    <boxGeometry args={[pw / 2 - doorW / 2 - post, ph - 0.1, 0.05]} />
+                    {glass}
+                  </mesh>
+                ))}
+                {/* transom above the door */}
+                <mesh position={[0, doorH + (ph - doorH) / 2, pd / 2]} castShadow>
+                  <boxGeometry args={[doorW, ph - doorH - 0.1, 0.05]} />
+                  {glass}
+                </mesh>
+                {/* door frame posts + lintel */}
+                {[-doorW / 2, doorW / 2].map((x) => (
+                  <mesh key={x} position={[x, doorH / 2, pd / 2]} castShadow>
+                    <boxGeometry args={[frameT, doorH, frameT * 1.8]} />
+                    {wood}
+                  </mesh>
+                ))}
+                <mesh position={[0, doorH + frameT / 2, pd / 2]} castShadow>
+                  <boxGeometry args={[doorW + frameT, frameT, frameT * 1.8]} />
+                  {wood}
+                </mesh>
+                {/* glass door leaf, ajar */}
+                <group
+                  position={[-doorW / 2 + frameT / 2, 0, pd / 2]}
+                  rotation={[0, -0.5, 0]}
+                >
+                  <mesh position={[(doorW - frameT) / 2, doorH / 2, 0]} castShadow>
+                    <boxGeometry args={[doorW - frameT, doorH - 0.04, 0.05]} />
+                    {glass}
+                  </mesh>
+                  <mesh position={[doorW - frameT - 0.12, doorH * 0.48, 0.06]}>
+                    <boxGeometry args={[0.04, 0.22, 0.03]} />
+                    <meshStandardMaterial color="#222" metalness={0.9} roughness={0.2} />
+                  </mesh>
+                </group>
+                {/* threshold */}
+                <mesh position={[0, 0.02, pd / 2]} receiveShadow>
+                  <boxGeometry args={[pw, 0.05, 0.6]} />
+                  <meshStandardMaterial color="#8a6a3a" roughness={0.8} />
+                </mesh>
+              </>
+            );
+          })()}
         </group>
       )}
     </group>

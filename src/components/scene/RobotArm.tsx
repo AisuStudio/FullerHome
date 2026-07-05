@@ -32,6 +32,14 @@ export const HOME_POSE: RobotPose = {
   elbow: -1.8,
 };
 
+/** folded flat (~1.5m tall) so the robot fits through the door opening */
+export const EXIT_POSE: RobotPose = {
+  yaw: 0,
+  mastHeight: 0.9,
+  shoulder: 0.12,
+  elbow: -2.9,
+};
+
 /** 2-link IK in the vertical plane through the target (elbow-up solution) */
 export function solveIK(target: THREE.Vector3, mastHeight: number): RobotPose {
   const yaw = Math.atan2(target.x, target.z);
