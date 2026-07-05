@@ -1,0 +1,53 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Aisu Studio palette */
+  --color-blueberry: #1f1934;
+  --color-grape: #5100ff;
+  --color-lemon: #d8ff01;
+  --color-hazelnut: #9e9c95;
+  --color-cappucino: #d9d7ce;
+  --color-vanilla: #eae8e0;
+
+  --color-bg: var(--color-vanilla);
+  --color-surface: rgba(255, 255, 255, 0.78);
+  --color-border: var(--color-cappucino);
+  --color-text: var(--color-blueberry);
+  /* WCAG: #93928e on vanilla is only 2.6:1 — darkened to ≥4.5:1 */
+  --color-muted: #66655f;
+  /* lemon is a HIGHLIGHT SURFACE, never a text color on light bg */
+  --color-accent: var(--color-lemon);
+  --color-on-accent: var(--color-blueberry);
+
+  --font-sans: var(--font-public-sans), "Public Sans", system-ui, sans-serif;
+  --font-mono: "iA Writer Mono S", "iA Writer Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+#scene-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.app-shell {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  pointer-events: none;
+}
+
+.app-shell button {
+  pointer-events: auto;
+}

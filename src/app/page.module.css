@@ -1,0 +1,203 @@
+.main {
+  position: relative;
+  width: 100%;
+}
+
+.simSection {
+  position: relative;
+  width: 100%;
+  height: 85vh;
+  overflow: hidden;
+}
+
+.scrollHint {
+  position: absolute;
+  bottom: 24px;
+  right: 28px;
+  z-index: 3;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+  text-decoration: none;
+  padding: 14px 26px;
+  border-radius: 28px;
+  border: 1.5px solid var(--color-text);
+  background: var(--color-accent);
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.scrollHint:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+/* --- info section --- */
+
+.infoSection {
+  position: relative;
+  background: var(--color-vanilla);
+  border-top: 1px solid var(--color-border);
+}
+
+.infoInner {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 72px 28px 48px;
+}
+
+.infoInner h2 {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--color-text);
+  margin: 48px 0 16px;
+}
+
+.infoInner h2:first-child {
+  margin-top: 0;
+}
+
+.infoInner p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--color-text);
+  margin-bottom: 14px;
+}
+
+.infoInner strong {
+  font-weight: 700;
+}
+
+.infoInner a {
+  color: var(--color-text);
+  text-decoration: none;
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.infoInner a:hover {
+  background: var(--color-accent);
+}
+
+.figure {
+  margin: 24px 0 8px;
+}
+
+.figure img {
+  width: 100%;
+  max-width: 560px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  display: block;
+}
+
+.figure figcaption {
+  font-size: 12px;
+  color: var(--color-muted);
+  margin-top: 8px;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.card h3 {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+  background: var(--color-accent);
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.card p {
+  font-size: 13px;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.compareTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+.compareTable th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-hazelnut);
+}
+
+.compareTable td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.compareTable td:first-child {
+  font-weight: 500;
+}
+
+.totalRow td {
+  color: var(--color-text) !important;
+  background: var(--color-accent);
+  font-weight: 700;
+  border-bottom: none;
+}
+
+.note {
+  font-size: 13px !important;
+  color: var(--color-muted) !important;
+}
+
+.roadmap {
+  list-style: none;
+  margin: 12px 0;
+}
+
+.roadmap li {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text);
+  padding: 7px 0 7px 24px;
+  position: relative;
+}
+
+.roadmap li::before {
+  content: "⬡";
+  position: absolute;
+  left: 0;
+  color: var(--color-text);
+  font-size: 12px;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 64px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-muted);
+}
