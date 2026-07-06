@@ -1,0 +1,126 @@
+.config {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.typeRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.typeBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 6px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--color-muted);
+  font-size: 10px;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.typeBtn svg {
+  opacity: 0.9;
+  max-width: 100%;
+}
+
+.typeBtn strong {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text);
+}
+
+.typeBtn.typeActive {
+  border-color: var(--color-text);
+  background: var(--color-accent);
+}
+
+.typeBtn.typeActive strong,
+.typeBtn.typeActive span {
+  color: var(--color-on-accent);
+}
+
+.budgetCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.budgetHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.budgetLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-muted);
+}
+
+.budgetValue {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-text);
+  background: var(--color-accent);
+  padding: 1px 8px;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.budgetSlider {
+  width: 100%;
+  accent-color: var(--color-blueberry);
+  cursor: pointer;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--color-muted);
+}
+
+.stat strong {
+  font-size: 13px;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.statTotal strong {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  padding: 0 5px;
+  border-radius: 3px;
+  width: fit-content;
+}
+
+.overBudget {
+  background: #c22a1c !important;
+  color: #fff !important;
+}
+
+.note {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--color-muted);
+}

@@ -107,7 +107,7 @@ export default function BuildSimulation() {
   const cursor = useSimStore((s) => s.cursor);
   const design = useSimStore((s) => s.design);
 
-  // exit rail: from the center out through the door
+  // exit path: the tracked robot drives out through the door opening
   const doorDir = useMemo(() => {
     const doorPlate = design.plates.find((p) => p.isDoor);
     if (!doorPlate) return new THREE.Vector3(0, 0, 1);
@@ -218,27 +218,8 @@ export default function BuildSimulation() {
     }
   });
 
-  const railLen = design.config.radius + 3.5;
-  const railAngle = Math.atan2(doorDir.x, doorDir.z);
-
   return (
     <>
-      {/* exit rail through the door */}
-      <group rotation-y={railAngle}>
-        {[-0.55, 0.55].map((x) => (
-          <mesh key={x} position={[x, 0.02, railLen / 2 - 0.5]} receiveShadow>
-            <boxGeometry args={[0.09, 0.05, railLen]} />
-            <meshStandardMaterial color="#8a8880" metalness={0.7} roughness={0.35} />
-          </mesh>
-        ))}
-        {Array.from({ length: Math.ceil(railLen / 1.2) }).map((_, i) => (
-          <mesh key={i} position={[0, 0.008, i * 1.2 - 0.4]} receiveShadow>
-            <boxGeometry args={[1.5, 0.035, 0.16]} />
-            <meshStandardMaterial color="#6d6b64" roughness={0.8} />
-          </mesh>
-        ))}
-      </group>
-
       <group ref={baseRef}>
         <RobotArm ref={robotRef} />
       </group>

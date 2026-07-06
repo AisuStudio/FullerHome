@@ -38,6 +38,8 @@ export interface ShellConfig {
   doorAngle: number;
   /** deterministic seed */
   seed: number;
+  /** interior fit-out €/m² — driven by budget (basic → premium) */
+  fitoutRate?: number;
 }
 
 /** flat glazed facade (panorama type): vertical cut plane */

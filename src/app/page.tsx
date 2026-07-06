@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import logo from "@/assets/fh-logo.svg";
 import BuildHUD from "@/components/ui/BuildHUD";
 import Datasheet from "@/components/ui/Datasheet";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
@@ -11,18 +12,39 @@ const Scene3D = dynamic(() => import("@/components/scene/Scene3D"), { ssr: false
 export default function HomePage() {
   return (
     <main className={styles.main}>
-      {/* --- Simulation (hero, 85% viewport) --- */}
-      <section className={styles.simSection}>
-        <ErrorBoundary>
-          <Scene3D />
-        </ErrorBoundary>
-        <div className="app-shell">
-          <BuildHUD />
+      {/* --- Site header --- */}
+      <header className={styles.siteHeader}>
+        <div className={styles.siteHeaderInner}>
+          <div className={styles.siteBrand}>
+            <h1 className={styles.srOnly}>
+              FullerHome — On-Site Robotic Shell Construction Concept / WebGL Experiment
+            </h1>
+            <img
+              src={logo.src}
+              alt="FullerHome Experiment"
+              className={styles.siteLogoImg}
+            />
+          </div>
+          <p className={styles.siteDesc}>
+            A WebGL experiment inspired by the timber pavilion of the 2014
+            Landesgartenschau in Schwäbisch Gmünd: configure a plate-shell home, then
+            watch an on-site robot mill and assemble it — plate by plate, bottom up.
+          </p>
         </div>
-        <a className={styles.scrollHint} href="#info">
-          Read more ↓
-        </a>
-      </section>
+      </header>
+
+      {/* --- Split: controls left, 3D right --- */}
+      <div className={styles.split}>
+        <aside className={styles.leftCol}>
+          <BuildHUD />
+        </aside>
+
+        <section className={styles.simSection}>
+          <ErrorBoundary>
+            <Scene3D />
+          </ErrorBoundary>
+        </section>
+      </div>
 
       {/* --- Info --- */}
       <section id="info" className={styles.infoSection}>
@@ -127,13 +149,39 @@ export default function HomePage() {
             <div className={styles.card}>
               <h3>Robot kinematics</h3>
               <p>
-                Articulated arm with shoulder and elbow joints on a growing mast, inverse
-                kinematics in real time. Per plate: pick → CNC mill → swing in → place.
-                The crown stays open until the very end — prefab modules (stairs,
-                intermediate floor) are lowered in through it.
+                Tracked mobile robot with an articulated shoulder-elbow arm on a vertical
+                lift column, inverse kinematics in real time. Per plate: pick → CNC mill
+                → swing in → place. When the shell is complete, it simply drives out
+                through the door opening — no rails, no crane.
               </p>
             </div>
           </div>
+
+          <h2>The robot: In-situ Fabricator</h2>
+          <p>
+            The machine in this simulation is modeled after the{" "}
+            <a
+              href="https://gramaziokohler.arch.ethz.ch/web/e/forschung/324.html"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <strong>In-situ Fabricator</strong>
+            </a>{" "}
+            developed at ETH Zurich (NCCR Digital Fabrication): a tracked, self-navigating
+            construction robot — an industrial arm on crawler tracks with on-board power
+            and control, built to fabricate directly on the construction site rather than
+            in a factory. It proved the concept in projects like Mesh Mould and the DFAB
+            HOUSE, where it built full-scale load-bearing walls on site.
+          </p>
+          <p>
+            Two honest gaps between the research machine and this concept: the original
+            IF carries roughly 40&nbsp;kg at 2.55&nbsp;m reach — our beech plates weigh
+            50–80&nbsp;kg, so a real deployment would need the next payload class (or two
+            robots sharing the load). And our vertical lift column is a concept extension:
+            the IF itself reaches height by repositioning, not by telescoping. Both are
+            engineering steps, not research questions — which is exactly what makes
+            on-site robotic assembly feel close.
+          </p>
 
           <h2>Simulation vs. reality</h2>
           <p>

@@ -1,46 +1,15 @@
-.header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+.panel {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 24px;
-  pointer-events: none;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.logo {
-  font-size: 26px;
-  color: var(--color-text);
-  line-height: 1;
-}
-
-.title {
-  font-family: var(--font-mono);
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--color-text);
-}
-
-.subtitle {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--color-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+  height: 100%;
 }
 
 .timeline {
   display: flex;
-  gap: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .timelineStep {
@@ -73,12 +42,7 @@
 }
 
 .stats {
-  position: absolute;
-  top: 70px;
-  right: 24px;
-  width: 224px;
-  background: var(--color-surface);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.6);
   border: 1px solid var(--color-border);
   border-radius: 10px;
   padding: 14px 16px;
@@ -114,148 +78,18 @@
   transition: width 0.3s ease;
 }
 
-.typeRow {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.typeBtn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 9px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.5);
-  color: var(--color-muted);
-  font-size: 11px;
-  cursor: pointer;
-  text-align: center;
-  transition: border-color 0.15s, background 0.15s;
-}
-
-.typeBtn svg {
-  opacity: 0.9;
-}
-
-.typeBtn strong {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--color-text);
-}
-
-.typeBtn.typeActive {
-  border-color: var(--color-text);
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-}
-
-.typeBtn.typeActive strong {
-  color: var(--color-on-accent);
-}
-
-.budgetPanel {
-  position: absolute;
-  bottom: 96px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 410px;
-  background: var(--color-surface);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 16px 18px;
-  pointer-events: auto;
-}
-
-.budgetHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 10px;
-}
-
-.budgetLabel {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-muted);
-}
-
-.budgetValue {
-  font-family: var(--font-mono);
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--color-text);
-  background: var(--color-accent);
-  padding: 1px 8px;
-  border-radius: 4px;
-  font-variant-numeric: tabular-nums;
-}
-
-.budgetSlider {
-  width: 100%;
-  accent-color: var(--color-blueberry);
-  cursor: pointer;
-  margin-bottom: 12px;
-}
-
-.budgetGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px 12px;
-}
-
-.budgetStat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 11px;
-  color: var(--color-muted);
-}
-
-.budgetStat strong {
-  font-size: 13px;
-  color: var(--color-text);
-  font-variant-numeric: tabular-nums;
-}
-
-.budgetTotal strong {
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-  padding: 0 5px;
-  border-radius: 3px;
-  width: fit-content;
-}
-
-.overBudget {
-  background: #c22a1c !important;
-  color: #fff !important;
-}
-
-.priceNote {
-  margin-top: 12px;
-  font-size: 11px;
-  line-height: 1.5;
-  color: var(--color-muted);
-}
-
 .controls {
-  position: absolute;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 8px;
 }
 
 .primaryBtn {
-  padding: 12px 32px;
+  flex: 1;
+  padding: 13px 28px;
   border-radius: 24px;
   border: 1.5px solid var(--color-text);
   background: var(--color-accent);
@@ -299,5 +133,5 @@
   font-weight: 700;
 }
 
-.primaryBtn:hover { opacity: 0.85; transform: scale(1.03); }
+.primaryBtn:hover { opacity: 0.85; transform: scale(1.02); }
 .secondaryBtn:hover { background: rgba(255, 255, 255, 1); }

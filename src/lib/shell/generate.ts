@@ -163,16 +163,27 @@ export interface CostBreakdown {
   fitoutWeeks: number;
 }
 
-export const BUDGET_MIN = 150_000;
-export const BUDGET_MAX = 600_000;
+export const BUDGET_MIN = 200_000;
+export const BUDGET_MAX = 650_000;
+
+// Fixed, realistic size per house type — all safely outside the robot's
+// working envelope (arm reach 6.55m, tracked base ~2.3m), so the machine
+// never collides with the shell regardless of budget.
+const TYPE_RADIUS: Record<HouseType, number> = {
+  iglu: 6.0, // ~96 m²
+  panorama: 6.2, // ~103 m²
+  loft: 5.8, // two levels, ~180 m² total
+};
 
 export function configForBudget(budget: number, houseType: HouseType): Partial<ShellConfig> {
   const t = Math.min(1, Math.max(0, (budget - BUDGET_MIN) / (BUDGET_MAX - BUDGET_MIN)));
   const base: Partial<ShellConfig> = {
     houseType,
-    radius: 3.8 + t * 3.7,
-    detail: budget < 260_000 ? 1 : budget < 430_000 ? 2 : 3,
+    radius: TYPE_RADIUS[houseType],
+    // budget drives build quality: plate resolution, glazing share, fit-out spec
+    detail: t < 0.33 ? 1 : t < 0.66 ? 2 : 3,
     glassRatio: 0.1 + t * 0.25,
+    fitoutRate: Math.round(900 + t * 1000),
   };
   if (houseType === "panorama") {
     // straight glass front replaces most shell glazing; door moves to the side
@@ -182,7 +193,6 @@ export function configForBudget(budget: number, houseType: HouseType): Partial<S
   if (houseType === "loft") {
     // taller-than-hemisphere bulb for two levels
     base.cutRatio = -0.32;
-    base.radius = 4.0 + t * 3.6;
   }
   return base;
 }
@@ -214,7 +224,8 @@ export function computeCosts(design: ShellDesign): CostBreakdown {
   const wood = Math.round(woodArea * 420);
   const glass = Math.round(glassArea * 650);
   const foundation = Math.round(Math.PI * r * r * 0.85 * 180);
-  const fitout = Math.round(floorAreaM2 * 1_400); // floors, bath, kitchen, electrics, HVAC
+  const fitoutRate = design.config.fitoutRate ?? 1_400;
+  const fitout = Math.round(floorAreaM2 * fitoutRate); // floors, bath, kitchen, electrics, HVAC
   const utilities = 25_000; // grid/water/sewage connection + central services core
   const slab = design.floorSlabY !== undefined
     ? Math.round((floorAreaM2 - Math.PI * r * r * 0.85) * 380)

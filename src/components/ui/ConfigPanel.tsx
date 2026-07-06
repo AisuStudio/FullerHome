@@ -1,0 +1,111 @@
+"use client";
+
+import { useSimStore } from "@/lib/store";
+import { BUDGET_MIN, BUDGET_MAX } from "@/lib/shell/generate";
+import { HouseType } from "@/lib/shell/types";
+import { HOUSE_TYPES } from "./BuildHUD";
+import styles from "./ConfigPanel.module.css";
+
+const euro = (n: number) => "€" + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
+
+function TypePreview({ type }: { type: HouseType }) {
+  const wood = "#B08D57";
+  const glass = "rgba(160, 205, 235, 0.55)";
+  if (type === "iglu") {
+    return (
+      <svg viewBox="0 0 64 36" width="64" height="36" aria-hidden>
+        <path d="M4 34 A28 28 0 0 1 60 34 Z" fill={wood} />
+        <path d="M22 34 A10 14 0 0 1 42 34 Z" fill={glass} />
+        <line x1="0" y1="34" x2="64" y2="34" stroke="#66655f" strokeWidth="1.5" />
+      </svg>
+    );
+  }
+  if (type === "panorama") {
+    return (
+      <svg viewBox="0 0 64 36" width="64" height="36" aria-hidden>
+        <path d="M4 34 A28 28 0 0 1 46 9 L46 34 Z" fill={wood} />
+        <rect x="46" y="9" width="14" height="25" fill={glass} />
+        <line x1="46" y1="9" x2="46" y2="34" stroke="#4a3a22" strokeWidth="1.5" />
+        <line x1="53" y1="12" x2="53" y2="34" stroke="#4a3a22" strokeWidth="1" />
+        <line x1="0" y1="34" x2="64" y2="34" stroke="#66655f" strokeWidth="1.5" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 64 36" width="64" height="36" aria-hidden>
+      <path d="M10 34 C6 20 14 3 32 3 C50 3 58 20 54 34 Z" fill={wood} />
+      <line x1="14" y1="20" x2="50" y2="20" stroke="#6B4A26" strokeWidth="2" />
+      <path d="M26 34 A6 9 0 0 1 38 34 Z" fill={glass} />
+      <line x1="0" y1="34" x2="64" y2="34" stroke="#66655f" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+/** Configuration bar shown ABOVE the 3D view during planning — never covers the scene */
+export default function ConfigPanel() {
+  const steps = useSimStore((s) => s.steps);
+  const costs = useSimStore((s) => s.costs);
+  const budget = useSimStore((s) => s.budget);
+  const houseType = useSimStore((s) => s.houseType);
+  const { setBudget, setHouseType } = useSimStore();
+
+  return (
+    <div className={styles.config}>
+      <div className={styles.typeRow}>
+        {HOUSE_TYPES.map((t) => (
+          <button
+            key={t.key}
+            className={`${styles.typeBtn} ${houseType === t.key ? styles.typeActive : ""}`}
+            onClick={() => setHouseType(t.key)}
+          >
+            <TypePreview type={t.key} />
+            <strong>{t.label}</strong>
+            <span>{t.desc}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className={styles.budgetCol}>
+        <div className={styles.budgetHeader}>
+          <span className={styles.budgetLabel}>Budget</span>
+          <strong className={styles.budgetValue}>{euro(budget)}</strong>
+        </div>
+        <input
+          type="range"
+          className={styles.budgetSlider}
+          min={BUDGET_MIN}
+          max={BUDGET_MAX}
+          step={5000}
+          value={budget}
+          onChange={(e) => setBudget(Number(e.target.value))}
+          aria-label="Budget"
+        />
+      </div>
+
+        <div className={styles.statsGrid}>
+          <div className={styles.stat}><span>Floor area</span><strong>{costs.floorAreaM2} m²</strong></div>
+          <div className={styles.stat}><span>Plates</span><strong>{steps.length}</strong></div>
+          <div className={styles.stat}><span>Shell (robot)</span><strong>~{costs.shellDays} day{costs.shellDays > 1 ? "s" : ""}</strong></div>
+          <div className={styles.stat}><span>Fit-out</span><strong>~{costs.fitoutWeeks} wks</strong></div>
+          <div className={styles.stat}><span>Timber shell</span><strong>{euro(costs.wood)}</strong></div>
+          <div className={styles.stat}><span>Glazing</span><strong>{euro(costs.glass)}</strong></div>
+          <div className={styles.stat}><span>Foundation</span><strong>{euro(costs.foundation)}</strong></div>
+          <div className={styles.stat}><span>Interior fit-out</span><strong>{euro(costs.fitout)}</strong></div>
+          <div className={styles.stat}><span>Utilities</span><strong>{euro(costs.utilities)}</strong></div>
+          <div className={styles.stat}><span>Robot</span><strong>{euro(costs.robot)}</strong></div>
+          <div className={styles.stat}><span>Planning 8%</span><strong>{euro(costs.planning)}</strong></div>
+          <div className={`${styles.stat} ${styles.statTotal}`}>
+            <span>Total</span>
+            <strong className={costs.total > budget ? styles.overBudget : ""}>{euro(costs.total)}</strong>
+          </div>
+        </div>
+
+      <p className={styles.note}>
+        Fixed size per house type; budget buys build quality — plate resolution, glazing
+        share and fit-out spec (€900–1,900/m²). Rough 2026 estimates, not quotes:
+        fabricated CLT shell ≈ €420/m², insulated glazing ≈ €650/m² (cf. BKI construction
+        cost data), planning &amp; permits 8%.
+      </p>
+    </div>
+  );
+}

@@ -4,12 +4,16 @@ import { forwardRef, useImperativeHandle, useRef } from "react";
 import * as THREE from "three";
 
 // ---------------------------------------------------------------------------
-// Articulated 2-link arm (shoulder + elbow, KUKA-style) on a rotating turret
-// with a modestly growing mast. Posed imperatively per frame via ref.
+// Modeled after the In-situ Fabricator (ETH Zurich, NCCR Digital Fabrication):
+// tracked mobile base + articulated 2-link arm. Concept extensions for this
+// sim: vertical lift column and a heavier vacuum gripper.
+// Posed imperatively per frame via ref.
 // ---------------------------------------------------------------------------
 
 export const L1 = 3.4; // upper arm
 export const L2 = 3.2; // forearm
+/** height of the slew ring above ground (tracks + body) */
+export const BASE_Y = 0.95;
 
 export interface RobotPose {
   yaw: number;
@@ -44,7 +48,7 @@ export const EXIT_POSE: RobotPose = {
 export function solveIK(target: THREE.Vector3, mastHeight: number): RobotPose {
   const yaw = Math.atan2(target.x, target.z);
   const d = Math.sqrt(target.x * target.x + target.z * target.z);
-  const dy = target.y - mastHeight;
+  const dy = target.y - (mastHeight + BASE_Y);
 
   let r = Math.sqrt(d * d + dy * dy);
   r = Math.min(Math.max(r, Math.abs(L1 - L2) + 0.05), L1 + L2 - 0.05);
@@ -91,39 +95,63 @@ const RobotArm = forwardRef<RobotArmHandle>(function RobotArm(_props, ref) {
       const y2 = y1 + L2 * Math.sin(a2);
       return new THREE.Vector3(
         Math.sin(pose.yaw) * d2,
-        pose.mastHeight + y2,
+        BASE_Y + pose.mastHeight + y2,
         Math.cos(pose.yaw) * d2
       );
     },
   }));
 
-  const orange = <meshStandardMaterial color="#e8a030" metalness={0.55} roughness={0.35} />;
-  const steel = <meshStandardMaterial color="#d8d8de" metalness={0.75} roughness={0.25} />;
-  const dark = <meshStandardMaterial color="#1e1e1e" metalness={0.85} roughness={0.2} />;
+  // In-situ Fabricator look: dark crawler tracks, steel body, white arm
+  const white = <meshStandardMaterial color="#e8e8e6" metalness={0.3} roughness={0.4} />;
+  const steel = <meshStandardMaterial color="#b8b8bc" metalness={0.7} roughness={0.3} />;
+  const dark = <meshStandardMaterial color="#26262a" metalness={0.7} roughness={0.35} />;
+  const track = <meshStandardMaterial color="#1c1c20" metalness={0.4} roughness={0.7} />;
 
   return (
     <group>
-      {/* base platform */}
-      <mesh position={[0, 0.08, 0]} receiveShadow>
-        <cylinderGeometry args={[1.0, 1.15, 0.16, 24]} />
-        <meshStandardMaterial color="#2c2c2c" metalness={0.7} roughness={0.35} />
+      {/* crawler tracks */}
+      {[-0.75, 0.75].map((x) => (
+        <group key={x} position={[x, 0.28, 0]}>
+          <mesh castShadow receiveShadow>
+            <boxGeometry args={[0.42, 0.5, 2.3]} />
+            {track}
+          </mesh>
+          {/* drive wheels hint */}
+          {[-0.85, 0, 0.85].map((z) => (
+            <mesh key={z} position={[0, -0.05, z]} rotation-z={Math.PI / 2}>
+              <cylinderGeometry args={[0.16, 0.16, 0.46, 12]} />
+              <meshStandardMaterial color="#3a3a3e" metalness={0.6} roughness={0.4} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+
+      {/* body: power pack + control unit */}
+      <mesh position={[0, 0.72, 0]} castShadow>
+        <boxGeometry args={[1.7, 0.45, 2.0]} />
+        {steel}
       </mesh>
-      <mesh position={[0, 0.17, 0]} rotation-x={Math.PI / 2}>
-        <torusGeometry args={[0.95, 0.03, 8, 48]} />
-        {orange}
+      <mesh position={[0, 0.99, -0.6]} castShadow>
+        <boxGeometry args={[1.5, 0.35, 0.7]} />
+        {dark}
+      </mesh>
+      {/* warning beacon */}
+      <mesh position={[0.6, 1.05, -0.85]}>
+        <cylinderGeometry args={[0.05, 0.05, 0.14, 8]} />
+        <meshStandardMaterial color="#e8a030" emissive="#e8a030" emissiveIntensity={0.6} />
       </mesh>
 
-      <group ref={turretRef}>
-        {/* turret housing */}
-        <mesh position={[0, 0.4, 0]} castShadow>
-          <cylinderGeometry args={[0.5, 0.6, 0.5, 16]} />
-          {steel}
+      <group ref={turretRef} position={[0, BASE_Y, 0]}>
+        {/* slew ring */}
+        <mesh position={[0, 0.08, 0]} castShadow>
+          <cylinderGeometry args={[0.42, 0.48, 0.18, 20]} />
+          {dark}
         </mesh>
 
-        {/* mast (unit height, scaled) */}
+        {/* vertical lift column (unit height, scaled) — concept extension of the IF */}
         <mesh ref={mastRef} castShadow>
-          <boxGeometry args={[0.45, 1, 0.45]} />
-          {orange}
+          <boxGeometry args={[0.4, 1, 0.4]} />
+          {steel}
         </mesh>
 
         {/* shoulder joint */}
@@ -136,7 +164,7 @@ const RobotArm = forwardRef<RobotArmHandle>(function RobotArm(_props, ref) {
           {/* upper arm along +z */}
           <mesh position={[0, 0, L1 / 2]} castShadow>
             <boxGeometry args={[0.3, 0.38, L1]} />
-            {orange}
+            {white}
           </mesh>
           {/* hydraulic detail */}
           <mesh position={[0, 0.26, L1 * 0.35]} castShadow rotation-x={Math.PI / 2}>
@@ -154,7 +182,7 @@ const RobotArm = forwardRef<RobotArmHandle>(function RobotArm(_props, ref) {
             {/* forearm */}
             <mesh position={[0, 0, L2 / 2]} castShadow>
               <boxGeometry args={[0.22, 0.28, L2]} />
-              {orange}
+              {white}
             </mesh>
 
             {/* wrist + vacuum gripper */}
