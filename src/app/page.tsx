@@ -31,8 +31,11 @@ export default function HomePage() {
 
       <div className={styles.caveatCard}>
         <p>
-          This is an experiment — a WebGL simulation, not an engineering or legal
-          tool. It (still) makes no claim to accuracy.
+          This is an experiment in progress:{" "}
+          <strong>
+            a WebGL simulation, not an engineering or legal tool. It (still)
+            makes no claim to accuracy.
+          </strong>
         </p>
       </div>
 
