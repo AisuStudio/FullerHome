@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Public_Sans } from "next/font/google";
+import SiteFooter from "@/components/ui/SiteFooter";
+import SiteNav from "@/components/ui/SiteNav";
+import StoreHydrator from "@/components/ui/StoreHydrator";
 import "@/styles/globals.css";
 
 const publicSans = Public_Sans({
@@ -16,7 +19,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={publicSans.variable}>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <StoreHydrator />
+        <SiteNav />
+        {children}
+        <SiteFooter />
+      </body>
     </html>
   );
 }

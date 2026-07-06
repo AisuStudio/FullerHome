@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState } from "react";
 import CostStructure from "./CostStructure";
 import styles from "./DeliverySection.module.css";
 
@@ -13,7 +14,7 @@ const TAKTS = [
   {
     idx: "Takt 02",
     title: "Permit & procurement planning",
-    text: "Permit application, structural verification, early alignment with the building authority — for public clients, the award procedure (above) runs here.",
+    text: "Permit application, structural verification, early alignment with the building authority — for public clients, the award procedure (see Procurement) runs here.",
     tag: "Critical path",
   },
   {
@@ -88,6 +89,23 @@ const DEVIATIONS = [
  * reframed from marketing copy to concept-study tone.
  */
 export default function DeliverySection() {
+  const [activeTakt, setActiveTakt] = useState(0);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const onTabKeyDown = (e: React.KeyboardEvent, i: number) => {
+    let next = i;
+    if (e.key === "ArrowRight") next = (i + 1) % TAKTS.length;
+    else if (e.key === "ArrowLeft") next = (i - 1 + TAKTS.length) % TAKTS.length;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = TAKTS.length - 1;
+    else return;
+    e.preventDefault();
+    setActiveTakt(next);
+    tabRefs.current[next]?.focus();
+  };
+
+  const takt = TAKTS[activeTakt];
+
   return (
     <section id="delivery" className={styles.section}>
       <div className={styles.inner}>
@@ -100,15 +118,35 @@ export default function DeliverySection() {
           structure from the start, not a risk appended later.
         </p>
 
-        <div className={styles.taktGrid}>
-          {TAKTS.map((t) => (
-            <div key={t.idx} className={styles.takt}>
-              <span className={styles.taktIdx}>{t.idx}</span>
-              <h3>{t.title}</h3>
-              <p>{t.text}</p>
-              <span className={styles.taktTag}>{t.tag}</span>
-            </div>
+        <div className={styles.taktTabs} role="tablist" aria-label="Project takts">
+          {TAKTS.map((t, i) => (
+            <button
+              key={t.idx}
+              ref={(el) => {
+                tabRefs.current[i] = el;
+              }}
+              role="tab"
+              id={`takt-tab-${i}`}
+              aria-selected={i === activeTakt}
+              aria-controls="takt-panel"
+              tabIndex={i === activeTakt ? 0 : -1}
+              className={`${styles.taktTab} ${i === activeTakt ? styles.taktTabActive : ""}`}
+              onClick={() => setActiveTakt(i)}
+              onKeyDown={(e) => onTabKeyDown(e, i)}
+            >
+              {t.idx}
+            </button>
           ))}
+        </div>
+        <div
+          id="takt-panel"
+          role="tabpanel"
+          aria-labelledby={`takt-tab-${activeTakt}`}
+          className={styles.taktPanel}
+        >
+          <h3>{takt.title}</h3>
+          <p>{takt.text}</p>
+          <span className={styles.taktTag}>{takt.tag}</span>
         </div>
 
         <CostStructure />

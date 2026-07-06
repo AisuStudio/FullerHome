@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import styles from "./PermitsSection.module.css";
 
 type CountryCard = {
@@ -13,7 +14,7 @@ const COUNTRIES: CountryCard[] = [
   {
     key: "de",
     name: "Germany",
-    band: ["#1f1934", "#d8ff01", "#eae8e0"],
+    band: ["#151515", "#dd0000", "#ffce00"],
     rows: [
       {
         term: "Legal basis",
@@ -34,7 +35,7 @@ const COUNTRIES: CountryCard[] = [
   {
     key: "at",
     name: "Austria",
-    band: ["#b8322c", "#f4f2ec", "#b8322c"],
+    band: ["#ed2939", "#ffffff", "#ed2939"],
     rows: [
       {
         term: "Legal basis",
@@ -55,7 +56,7 @@ const COUNTRIES: CountryCard[] = [
   {
     key: "ch",
     name: "Switzerland",
-    band: ["#b8322c", "#b8322c", "#b8322c"],
+    band: ["#da291c", "#da291c", "#da291c"],
     rows: [
       {
         term: "Legal basis",
@@ -87,8 +88,9 @@ export default function PermitsSection() {
       <div className={styles.inner}>
         <h2 className={styles.heading}>Building Permits</h2>
         <p className={styles.intro}>
-          Procurement (above) decides <em>who</em> may build — the building permit
-          decides <em>whether</em> and <em>what</em>. Domes are permittable, but they
+          <Link href="/procurement">Procurement</Link> decides <em>who</em> may build —
+          the building permit decides <em>whether</em> and <em>what</em>. Domes are
+          permittable, but they
           are not the standard case: the curved geodesic form falls outside typified
           roof shapes, which mainly affects setback calculations, fire-safety proofs
           and — depending on use — classification as a special-use building. The
@@ -121,8 +123,8 @@ export default function PermitsSection() {
         <p className={styles.caveat}>
           Typified planning guidance, not legal advice — the actual procedure, deadlines
           and fees depend on the specific Bundesland, canton or municipality and the
-          building class. The schedule table further down uses 3–12 months for the
-          permit phase to cover this full spread.
+          building class. The schedule table on the <Link href="/about">About page</Link>{" "}
+          uses 3–12 months for the permit phase to cover this full spread.
         </p>
       </div>
     </section>

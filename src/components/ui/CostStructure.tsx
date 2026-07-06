@@ -41,7 +41,8 @@ export default function CostStructure() {
         <h3 className={styles.colHead}>Cost structure, DIN 276 view</h3>
         <p className={styles.colSub}>
           The live cost model from the simulation, grouped the way a German cost
-          plan (DIN&nbsp;276) groups it — reacts to typology and budget above.
+          plan (DIN&nbsp;276) groups it — reacts to the typology and budget
+          configured on the simulation page.
         </p>
         {groups.map((g) => (
           <div key={g.label} className={styles.kgRow}>
@@ -65,9 +66,9 @@ export default function CostStructure() {
       <div className={styles.col}>
         <h3 className={styles.colHead}>Takt plan with a visible permit buffer</h3>
         <p className={styles.colSub}>
-          Same durations as the &ldquo;Simulation vs. reality&rdquo; table below —
-          the striped block is the named buffer for authority queries and
-          resubmissions, planned from day one.
+          Same durations as the &ldquo;Simulation vs. reality&rdquo; table on the
+          About page — the striped block is the named buffer for authority queries
+          and resubmissions, planned from day one.
         </p>
         {TAKT_BARS.map((b) => (
           <div key={b.label} className={styles.barRow}>

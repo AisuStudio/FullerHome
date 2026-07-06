@@ -9,17 +9,20 @@
   margin: 0 auto;
 }
 
-.caveatCard {
-  margin: 20px 28px;
-  padding: 14px 20px;
-  border-radius: 10px;
-  background: var(--color-accent);
+.nextHint {
+  margin: 20px 28px 32px;
+  font-size: 1rem;
+  color: var(--color-blueberry);
 }
 
-.caveatCard p {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: var(--color-blueberry);
+.nextHint a {
+  color: var(--color-text);
+  text-decoration: none;
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.nextHint a:hover {
+  background: var(--color-accent);
 }
 
 .split {

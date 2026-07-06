@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSimStore } from "@/lib/store";
 import { VERGABE_BANDS } from "@/lib/vergabe/bands";
 import { deriveVergabe } from "@/lib/vergabe/derive";
@@ -14,6 +15,12 @@ const LAND_LABELS: { key: Bundesland; label: string }[] = [
   { key: "berlin", label: "Berlin" },
   { key: "brandenburg", label: "Brandenburg" },
 ];
+
+const TYPE_LABELS: Record<HouseType, string> = {
+  shelter: "Weather Shelter",
+  office: "Tourism Office",
+  library: "Library",
+};
 
 // inverse of grossBudgetToNetConstructionValue (net = gross/1.19*0.92)
 const NET_TO_GROSS = 1.19 / 0.92;
@@ -59,7 +66,11 @@ export default function ProcurementSection() {
             <p className={styles.intro}>
               If this building were publicly commissioned, its budget would determine
               which award procedure (<em>Vergabeverfahren</em>) German procurement law
-              requires — reacting live to the configuration below.
+              requires. Configured building:{" "}
+              <strong>
+                {TYPE_LABELS[houseType]}, {euro(budget)}
+              </strong>{" "}
+              — <Link href="/">change it in the simulation</Link>.
             </p>
           </div>
 
@@ -138,7 +149,8 @@ export default function ProcurementSection() {
 
         <p className={styles.timelineNote}>
           This procedure runs <strong>before</strong> construction can start — its
-          duration adds to, not overlaps with, the build timeline shown below.
+          duration adds to, not overlaps with, the build schedule (see{" "}
+          <Link href="/about">About</Link>).
         </p>
 
         <p className={styles.disclaimer}>
