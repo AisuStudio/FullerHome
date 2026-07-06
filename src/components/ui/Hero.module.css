@@ -1,11 +1,12 @@
 .hero {
   position: relative;
   min-height: 60vh;
+  padding-bottom: 96px;
   background-size: cover;
   background-position: center 55%;
   display: flex;
   align-items: center;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* aligns the overlay content to the same 1000px column as the rest of the

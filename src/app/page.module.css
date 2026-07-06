@@ -28,7 +28,7 @@
   display: flex;
   align-items: stretch;
   min-height: 78vh;
-  margin-top: -64px;
+  margin-top: -32px;
   border-radius: 16px 16px 0 0;
   overflow: hidden;
   box-shadow: 0 -12px 32px rgba(15, 15, 20, 0.25);
@@ -39,15 +39,13 @@
   flex-shrink: 0;
   background: var(--color-vanilla);
   border-right: 1px solid var(--color-border);
-  overflow-y: auto;
-  max-height: 78vh;
 }
 
 .simSection {
   position: relative;
   flex: 1;
   min-width: 0;
-  height: 78vh;
+  min-height: 78vh;
   overflow: hidden;
 }
 
