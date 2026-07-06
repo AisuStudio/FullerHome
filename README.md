@@ -14,7 +14,8 @@ Live: https://aisustudio.github.io/FullerHome/
 
 ## What's in it
 
-- **Public typologies** — Weather Shelter (open "Muschel" shell, no door),
+- **Public typologies** — Vehicle Shelter (shallow geodesic roof cap raised
+  on stilts, a Bauhof-style carport, open on all sides, no door),
   Tourism Office (glazed street front), Library (twin-lobe elongated plan with
   a long-side panorama window). Each has its own commissioning body and
   budget range; budget scales both building **size** and build **quality**

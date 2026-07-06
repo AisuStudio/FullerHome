@@ -7,7 +7,7 @@ import styles from "./Datasheet.module.css";
 const euro = (n: number) => "€" + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
 
 const TYPE_LABELS: Record<string, { label: string; desc: string }> = {
-  shelter: { label: "Weather Shelter", desc: "Small park pavilion" },
+  shelter: { label: "Vehicle Shelter", desc: "Geodesic carport, on stilts" },
   office: { label: "Tourism Office", desc: "Glazed street front" },
   library: { label: "Library", desc: "Two-level branch library" },
 };

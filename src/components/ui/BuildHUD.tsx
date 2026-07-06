@@ -19,7 +19,7 @@ export const HOUSE_TYPES: {
   /** who commissions this typology, in the simulation's framing */
   client: string;
 }[] = [
-  { key: "shelter", label: "Weather Shelter", desc: "Open shell pavilion", client: "District parks department" },
+  { key: "shelter", label: "Vehicle Shelter", desc: "Geodesic carport, on stilts", client: "District parks department (Bauhof)" },
   { key: "office", label: "Tourism Office", desc: "Glazed street front", client: "Municipality / tourism board" },
   { key: "library", label: "Library", desc: "Two-level branch library", client: "Municipality (branch library)" },
 ];

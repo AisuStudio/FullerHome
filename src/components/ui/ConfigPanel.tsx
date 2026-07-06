@@ -12,11 +12,14 @@ function TypePreview({ type }: { type: HouseType }) {
   const wood = "#B08D57";
   const glass = "rgba(160, 205, 235, 0.55)";
   if (type === "shelter") {
-    // open "Muschel" band shell: dome cut open on the front, no glazing
+    // shallow geodesic roof cap raised on stilts — a vehicle carport, open
+    // underneath on all sides (no glazing, no walls reaching the ground)
     return (
       <svg viewBox="0 0 64 36" width="64" height="36" aria-hidden>
-        <path d="M4 34 A28 28 0 0 1 44 8 L44 34 Z" fill={wood} />
-        <path d="M44 8 A28 28 0 0 1 60 34 L52 34 A20 20 0 0 0 44 18 Z" fill={wood} opacity="0.45" />
+        <path d="M10 19 Q32 4 54 19 L54 21 Q32 8 10 21 Z" fill={wood} />
+        <line x1="14" y1="20" x2="14" y2="33" stroke="#66655f" strokeWidth="2" />
+        <line x1="32" y1="15" x2="32" y2="33" stroke="#66655f" strokeWidth="2" />
+        <line x1="50" y1="20" x2="50" y2="33" stroke="#66655f" strokeWidth="2" />
         <line x1="0" y1="34" x2="64" y2="34" stroke="#66655f" strokeWidth="1.5" />
       </svg>
     );

@@ -178,10 +178,17 @@ export const TYPE_BUDGET: Record<HouseType, { min: number; max: number; step: nu
 // by arm reach: the robot repositions between work stations inside the
 // footprint (src/lib/shell/stations.ts), like the real In-situ Fabricator.
 const TYPE_RADIUS_RANGE: Record<HouseType, Range> = {
-  shelter: { min: 2.0, max: 2.9 }, // ~11–22 m²
-  office: { min: 4.0, max: 6.0 }, // ~43–96 m²
+  shelter: { min: 3.0, max: 4.0 }, // ~5.6–7.5 m canopy diameter (carport bay)
+  office: { min: 4.3, max: 6.0 }, // ~50–96 m² (min bumped up from 4.0 for headroom margin)
   library: { min: 4.2, max: 6.0 }, // ×1.1 elongation, two levels — ~95–190 m² total
 };
+
+// The Vehicle Shelter is a shallow geodesic roof cap raised on stilts — a
+// Bauhof-style vehicle carport, not an enclosed room. Working underneath it
+// in open air (like the real In-situ Fabricator on an open site, or like the
+// office/library interiors) avoids trapping the robot inside a dome too
+// short for its own reach — see src/lib/shell/stations.ts' clearance check.
+export const CARPORT_STILT_HEIGHT_M = 3.0; // Unimog/tractor clearance
 
 // The library is stretched along Z into an elongated, gallery-like plan (like
 // the ITKE Landesgartenschau pavilion) rather than a symmetric dome — reads
@@ -257,8 +264,9 @@ export function configForBudget(budget: number, houseType: HouseType): Partial<S
     robotCost: Math.round(lerp(TYPE_ROBOT_RATE[houseType], t)),
   };
   if (houseType === "shelter") {
-    // open "Muschel" band shell: pure timber, no glazing, no door
+    // shallow geodesic roof cap (carport), pure timber, no glazing, no door
     base.glassRatio = 0;
+    base.cutRatio = 0.35;
   }
   if (houseType === "office") {
     // straight glass front (street-facing) replaces most shell glazing; door to the side
@@ -281,30 +289,46 @@ export interface BuildingDims {
   widthM: number;
   /** footprint along, m (Z axis — longer for the elongated library) */
   lengthM: number;
-  /** shell crown height above ground, m */
+  /** shell crown height above ground, m (includes the carport's stilts) */
   heightM: number;
+  /** vehicle clearance under the canopy, m — only set for the carport */
+  clearHeightM?: number;
 }
 
 /** outer footprint + height of the generated shell, for dimension displays */
 export function buildingDims(design: ShellDesign): BuildingDims {
   const r = design.config.radius;
   const elongation = design.config.houseType === "library" ? LIBRARY_ELONGATION : 1;
-  // crown height: sphere top shifted up by the ground cut (see generateShell's yOff)
-  const heightM = r * (1 - design.config.cutRatio);
+  const isCarport = design.config.houseType === "shelter";
+  // crown height: sphere top shifted up by the ground cut (see generateShell's
+  // yOff), plus the stilt lift for the carport
+  const heightM =
+    r * (1 - design.config.cutRatio) + (isCarport ? CARPORT_STILT_HEIGHT_M : 0);
   // flat cut planes trim one side: office along +z (glass front at r·0.45),
-  // shelter along +z (open front at r·0.2), library along +x (panorama window)
+  // library along +x (panorama window); the carport is open on all sides
   const lengthM =
-    design.config.houseType === "office"
-      ? r + r * 0.45
-      : design.config.houseType === "shelter"
-        ? r + r * 0.2
-        : 2 * r * elongation;
+    design.config.houseType === "office" ? r + r * 0.45 : 2 * r * elongation;
   const widthM = design.config.houseType === "library" ? r + r * 0.4 : 2 * r;
   return {
     widthM: Math.round(widthM * 10) / 10,
     lengthM: Math.round(lengthM * 10) / 10,
     heightM: Math.round(heightM * 10) / 10,
+    ...(isCarport ? { clearHeightM: CARPORT_STILT_HEIGHT_M } : {}),
   };
+}
+
+/** interior ceiling height (world Y) directly above a ground point at
+ *  horizontal distance d from the shell's vertical axis, treating the shell
+ *  as a sphere (matches buildingDims' approximation). Returns 0 outside the
+ *  shell's actual footprint radius (valid for cutRatio of either sign — a
+ *  positive cutRatio, e.g. the carport's shallow cap, shrinks the footprint
+ *  to r·sqrt(1-cutRatio²), not r itself). Does not include the carport's
+ *  stilt lift — callers add that separately (see CARPORT_STILT_HEIGHT_M). */
+export function localCeiling(config: ShellConfig, d: number): number {
+  const r = config.radius;
+  const footprintR = r * Math.sqrt(Math.max(0, 1 - config.cutRatio ** 2));
+  if (d >= footprintR) return 0;
+  return Math.sqrt(r * r - d * d) - config.cutRatio * r;
 }
 
 export function computeCosts(design: ShellDesign): CostBreakdown {
@@ -430,15 +454,10 @@ export function generateShell(partial?: Partial<ShellConfig>): ShellDesign {
 
   const cutY = cutRatio * radius;
 
-  // vertical cut plane along +z: office gets a flat glass facade there;
-  // the shelter is a "Muschel" — an open band shell with NO infill, the
-  // opening is the entrance (the robot works from the forecourt through it)
-  const frontDist =
-    config.houseType === "office"
-      ? radius * 0.45
-      : config.houseType === "shelter"
-        ? radius * 0.2
-        : Infinity;
+  // vertical cut plane along +z: only office gets a flat glass facade there —
+  // the shelter (carport, raised on stilts) is open on all sides, so it gets
+  // no side cut at all, same as the library's front
+  const frontDist = config.houseType === "office" ? radius * 0.45 : Infinity;
   // library: vertical cut plane along +x — a panorama window on the LONG
   // side of the elongated plan (x is untouched by the z-elongation above)
   const sideFrontDist = config.houseType === "library" ? radius * 0.4 : Infinity;
@@ -579,6 +598,16 @@ export function generateShell(partial?: Partial<ShellConfig>): ShellDesign {
 
   const floorSlabY =
     config.houseType === "library" ? Math.round(radius * 0.42 * 10) / 10 : undefined;
+
+  // carport: lift the whole cap onto its stilts — generated above as if it
+  // sat straight on the ground, then raised uniformly so ring/neighbor/
+  // sequencing logic (all relative) is unaffected
+  if (config.houseType === "shelter") {
+    for (const p of plates) {
+      p.centroid.y += CARPORT_STILT_HEIGHT_M;
+      for (const v of p.vertices) v.y += CARPORT_STILT_HEIGHT_M;
+    }
+  }
 
   return {
     config,

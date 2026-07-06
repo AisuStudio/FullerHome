@@ -17,7 +17,7 @@ const LAND_LABELS: { key: Bundesland; label: string }[] = [
 ];
 
 const TYPE_LABELS: Record<HouseType, string> = {
-  shelter: "Weather Shelter",
+  shelter: "Vehicle Shelter",
   office: "Tourism Office",
   library: "Library",
 };
@@ -27,7 +27,7 @@ const NET_TO_GROSS = 1.19 / 0.92;
 
 /** The gross budget that best targets this band, clamped to the typology's
  * own realistic range. Always clickable — for typologies whose budget range
- * never reaches a given band (e.g. a Weather Shelter can't reach "EU-weit"),
+ * never reaches a given band (e.g. a Vehicle Shelter can't reach "EU-weit"),
  * this just moves the slider as close as the type allows, which is itself
  * the honest answer ("this typology never triggers that procedure"). */
 function grossBudgetForBand(

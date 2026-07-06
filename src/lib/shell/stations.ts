@@ -1,5 +1,6 @@
 import { ShellDesign, Vec3 } from "./types";
-import { canReachFrom } from "../robot";
+import { canReachFrom, L1, L2, BASE_Y, mastFor } from "../robot";
+import { localCeiling, CARPORT_STILT_HEIGHT_M } from "./generate";
 
 // ---------------------------------------------------------------------------
 // Work-station planner for the repositioning robot. The realistically sized
@@ -18,6 +19,50 @@ export type Station = { x: number; z: number };
 
 export function stationCanReach(s: Station, plateCentroid: Vec3): boolean {
   return canReachFrom(s.x, s.z, plateCentroid.x, plateCentroid.y, plateCentroid.z);
+}
+
+/** does placing this plate from this station clear the shell's local
+ *  interior ceiling? A station can be within arm-reach distance of a plate
+ *  and still sweep the elbow into the roof — reach alone (stationCanReach)
+ *  doesn't check that. Mirrors the elbow-up solveIK shoulder angle (see
+ *  RobotArm.tsx) to compute where the elbow joint actually ends up (not
+ *  directly above the station — it swings out horizontally toward the
+ *  target by `L1·cos(shoulder)`, same as RobotArm.tsx's FK), then checks
+ *  that point against the ceiling directly above ITS horizontal position
+ *  (not the station's). */
+export function stationHasClearance(
+  s: Station,
+  plateCentroid: Vec3,
+  design: ShellDesign
+): boolean {
+  const config = design.config;
+  const isCarport = config.houseType === "shelter";
+  const stiltLift = isCarport ? CARPORT_STILT_HEIGHT_M : 0;
+
+  const dx = plateCentroid.x - s.x;
+  const dz = plateCentroid.z - s.z;
+  const yaw = Math.atan2(dx, dz);
+  const horiz = Math.sqrt(dx * dx + dz * dz);
+  const mastHeight = mastFor(plateCentroid.y);
+  const dy = plateCentroid.y - (mastHeight + BASE_Y);
+
+  let r = Math.sqrt(horiz * horiz + dy * dy);
+  r = Math.min(Math.max(r, Math.abs(L1 - L2) + 0.05), L1 + L2 - 0.05);
+  const cosAlpha = (L1 * L1 + r * r - L2 * L2) / (2 * L1 * r);
+  const alpha = Math.acos(Math.min(1, Math.max(-1, cosAlpha)));
+  const shoulder = Math.atan2(dy, horiz) + alpha;
+  const elbowY = BASE_Y + mastHeight + L1 * Math.sin(shoulder);
+
+  // elbow's horizontal position: station + L1·cos(shoulder) along the yaw
+  // toward the target (matches RobotArm.tsx gripperTip's `d1` term)
+  const elbowHoriz = L1 * Math.cos(shoulder);
+  const elbowX = s.x + Math.sin(yaw) * elbowHoriz;
+  const elbowZ = s.z + Math.cos(yaw) * elbowHoriz;
+  const elbowD = Math.hypot(elbowX, elbowZ);
+
+  const ceilingBase = localCeiling(config, elbowD);
+  if (ceilingBase === 0) return true; // outside the roofed footprint — open sky
+  return elbowY <= ceilingBase + stiltLift;
 }
 
 /**
@@ -77,8 +122,11 @@ export interface DepotLayout {
 
 /**
  * Material depot placement. Closed shells (office, library) get their depot
- * crane-delivered to the CENTER through the still-open crown; the open
- * shelter ("Muschel") is served from the forecourt in front of its opening.
+ * crane-delivered to the CENTER through the still-open crown; the carport
+ * (raised on stilts, open underneath on all sides) is served from a
+ * forecourt just outside its footprint — material stays out of the robot's
+ * direct path under the canopy, not for collision-avoidance (the stilt
+ * elevation already handles that).
  */
 export function depotLayout(design: ShellDesign): DepotLayout {
   if (design.config.houseType === "shelter") {

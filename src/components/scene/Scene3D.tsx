@@ -7,6 +7,7 @@ import BuildSimulation from "./BuildSimulation";
 import MaterialYard from "./MaterialYard";
 import DoorAndInterior from "./DoorAndInterior";
 import DimensionLine from "./DimensionLine";
+import CarportStilts from "./CarportStilts";
 import { useSimStore } from "@/lib/store";
 import { LIBRARY_ELONGATION } from "@/lib/shell/generate";
 
@@ -77,6 +78,7 @@ export default function Scene3D() {
       <MaterialYard />
       <DoorAndInterior />
       <DimensionLine />
+      <CarportStilts design={design} />
 
       <OrbitControls
         makeDefault

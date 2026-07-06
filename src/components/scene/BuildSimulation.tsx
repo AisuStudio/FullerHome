@@ -21,8 +21,10 @@ import { mastFor } from "@/lib/robot";
 /** ground speed while repositioning, m/s (scaled by sim speed) */
 const DRIVE_SPEED = 1.2;
 
-/** arm raised forward so the carried plate clears the ground while driving */
-const CARRY_POSE: RobotPose = { yaw: 0, mastHeight: 2.0, shoulder: 0.7, elbow: -1.5 };
+/** arm held low-forward so the carried plate stays visible and clears the
+ *  ground while driving, without sweeping the elbow above shell height
+ *  (FK elbow-peak ≈1.8m, vs. the old high carry pose's 3.84m) */
+const TRAVEL_POSE: RobotPose = { yaw: 0, mastHeight: 0.8, shoulder: 0.2, elbow: -1.0 };
 
 type SubPhase =
   | "toDepot" // drive to the central depot stand
@@ -251,7 +253,7 @@ export default function BuildSimulation() {
           Math.min(1, dt * speed * 3)
         );
       }
-      const travelPose = sub.current === "toStation" ? CARRY_POSE : TUCK_POSE;
+      const travelPose = sub.current === "toStation" ? TRAVEL_POSE : TUCK_POSE;
       currentPose.current = lerpPose(currentPose.current, travelPose, Math.min(1, dt * speed * 2));
     } else {
       const pickupPoint = new THREE.Vector3(depot.pickup.x, depot.pickup.y, depot.pickup.z);
@@ -261,7 +263,7 @@ export default function BuildSimulation() {
         grab: poseFor(pickupPoint.clone().setY(0.45), basePos.current, baseYaw.current),
         toMill: poseFor(millPoint, basePos.current, baseYaw.current),
         mill: poseFor(millPoint.clone().setY(0.7), basePos.current, baseYaw.current),
-        carryUp: CARRY_POSE,
+        carryUp: TRAVEL_POSE,
         toTarget: poseFor(
           targetCentroid.clone().sub(
             targetCentroid
@@ -275,7 +277,7 @@ export default function BuildSimulation() {
           baseYaw.current
         ),
         place: poseFor(targetCentroid, basePos.current, baseYaw.current),
-        retract: CARRY_POSE,
+        retract: TRAVEL_POSE,
       };
       currentPose.current = lerpPose(
         fromPose.current,
