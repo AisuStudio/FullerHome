@@ -205,7 +205,7 @@ const lerp = (r: Range, t: number) => r.min + t * (r.max - r.min);
 // needs acoustic/fire-rated, high-load-bearing (book stacks ~7.2 kN/m²)
 // construction — hence the much wider ceiling.
 const TYPE_WOOD_RATE: Record<HouseType, Range> = {
-  shelter: { min: 160, max: 420 },
+  shelter: { min: 220, max: 560 },
   office: { min: 200, max: 900 },
   library: { min: 650, max: 2_400 },
 };
@@ -215,14 +215,14 @@ const TYPE_GLASS_RATE: Record<HouseType, Range> = {
   library: { min: 900, max: 3_200 },
 };
 const TYPE_FOUNDATION_RATE: Record<HouseType, Range> = {
-  shelter: { min: 80, max: 250 },
+  shelter: { min: 100, max: 320 },
   office: { min: 90, max: 380 },
   library: { min: 350, max: 900 },
 };
 // Fit-out standard range €/m²: a park shelter needs almost none, a branch
 // library needs shelving, media points, climate-controlled archives.
 const TYPE_FITOUT_RATE: Record<HouseType, Range> = {
-  shelter: { min: 120, max: 750 },
+  shelter: { min: 180, max: 1_000 },
   office: { min: 400, max: 3_500 },
   library: { min: 3_000, max: 13_000 },
 };
@@ -234,7 +234,7 @@ const TYPE_UTILITIES_RATE: Record<HouseType, Range> = {
   library: { min: 100_000, max: 520_000 },
 };
 const TYPE_ROBOT_RATE: Record<HouseType, Range> = {
-  shelter: { min: 4_000, max: 13_000 },
+  shelter: { min: 5_000, max: 16_000 },
   office: { min: 8_000, max: 70_000 },
   library: { min: 130_000, max: 450_000 },
 };
@@ -256,6 +256,10 @@ export function configForBudget(budget: number, houseType: HouseType): Partial<S
     utilitiesCost: Math.round(lerp(TYPE_UTILITIES_RATE[houseType], t)),
     robotCost: Math.round(lerp(TYPE_ROBOT_RATE[houseType], t)),
   };
+  if (houseType === "shelter") {
+    // open "Muschel" band shell: pure timber, no glazing, no door
+    base.glassRatio = 0;
+  }
   if (houseType === "office") {
     // straight glass front (street-facing) replaces most shell glazing; door to the side
     base.glassRatio = 0.05 + t * 0.08;
@@ -288,9 +292,13 @@ export function buildingDims(design: ShellDesign): BuildingDims {
   // crown height: sphere top shifted up by the ground cut (see generateShell's yOff)
   const heightM = r * (1 - design.config.cutRatio);
   // flat cut planes trim one side: office along +z (glass front at r·0.45),
-  // library along +x (long-side panorama window at r·0.4)
+  // shelter along +z (open front at r·0.2), library along +x (panorama window)
   const lengthM =
-    design.config.houseType === "office" ? r + r * 0.45 : 2 * r * elongation;
+    design.config.houseType === "office"
+      ? r + r * 0.45
+      : design.config.houseType === "shelter"
+        ? r + r * 0.2
+        : 2 * r * elongation;
   const widthM = design.config.houseType === "library" ? r + r * 0.4 : 2 * r;
   return {
     widthM: Math.round(widthM * 10) / 10,
@@ -422,8 +430,15 @@ export function generateShell(partial?: Partial<ShellConfig>): ShellDesign {
 
   const cutY = cutRatio * radius;
 
-  // office: vertical cut plane along +z for the flat glass facade
-  const frontDist = config.houseType === "office" ? radius * 0.45 : Infinity;
+  // vertical cut plane along +z: office gets a flat glass facade there;
+  // the shelter is a "Muschel" — an open band shell with NO infill, the
+  // opening is the entrance (the robot works from the forecourt through it)
+  const frontDist =
+    config.houseType === "office"
+      ? radius * 0.45
+      : config.houseType === "shelter"
+        ? radius * 0.2
+        : Infinity;
   // library: vertical cut plane along +x — a panorama window on the LONG
   // side of the elongated plan (x is untouched by the z-elongation above)
   const sideFrontDist = config.houseType === "library" ? radius * 0.4 : Infinity;
@@ -493,31 +508,35 @@ export function generateShell(partial?: Partial<ShellConfig>): ShellDesign {
 
   const rings = assignRings(plates, radius * 0.08);
 
-  // door: the ring-0 plate nearest doorAngle + the plate directly above it
+  // door: the ring-0 plate nearest doorAngle + the plate directly above it.
+  // The shelter gets NO door — its open front IS the entrance.
   const doorDir = { x: Math.sin(doorAngle), y: 0, z: Math.cos(doorAngle) };
-  const ring0 = plates.filter((p) => p.ring === 0);
-  const doorPlate = ring0.reduce((best, p) =>
-    dot(norm({ x: p.centroid.x, y: 0, z: p.centroid.z }), doorDir) >
-    dot(norm({ x: best.centroid.x, y: 0, z: best.centroid.z }), doorDir)
-      ? p
-      : best
-  );
-  // entrance opening: two plates high (ring 0 + the one above) — stays open as
-  // the robot's exit passage; a straight vertical portal (dormer) is installed
-  // in front of it afterwards. Curved plates can't be fitted from outside.
-  doorPlate.isDoor = true;
-  doorPlate.material = "glass";
-  const above = doorPlate.neighbors
-    .map((n) => plates[n])
-    .filter((p) => p.ring === 1)
-    .sort(
-      (a, b) =>
-        dot(norm({ x: b.centroid.x, y: 0, z: b.centroid.z }), doorDir) -
-        dot(norm({ x: a.centroid.x, y: 0, z: a.centroid.z }), doorDir)
-    )[0];
-  if (above) {
-    above.isDoor = true;
-    above.material = "glass";
+  if (config.houseType !== "shelter") {
+    const ring0 = plates.filter((p) => p.ring === 0);
+    const doorPlate = ring0.reduce((best, p) =>
+      dot(norm({ x: p.centroid.x, y: 0, z: p.centroid.z }), doorDir) >
+      dot(norm({ x: best.centroid.x, y: 0, z: best.centroid.z }), doorDir)
+        ? p
+        : best
+    );
+    // entrance opening: two plates high (ring 0 + the one above) — stays open
+    // as the robot's exit passage; a straight vertical portal (dormer) is
+    // installed in front of it afterwards. Curved plates can't be fitted from
+    // outside.
+    doorPlate.isDoor = true;
+    doorPlate.material = "glass";
+    const above = doorPlate.neighbors
+      .map((n) => plates[n])
+      .filter((p) => p.ring === 1)
+      .sort(
+        (a, b) =>
+          dot(norm({ x: b.centroid.x, y: 0, z: b.centroid.z }), doorDir) -
+          dot(norm({ x: a.centroid.x, y: 0, z: a.centroid.z }), doorDir)
+      )[0];
+    if (above) {
+      above.isDoor = true;
+      above.material = "glass";
+    }
   }
 
   // glass plates: deterministic, south-biased (toward doorAngle+PI is "garden side")

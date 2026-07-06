@@ -30,23 +30,24 @@ export default function DoorAndInterior() {
     return { angle, dist, r };
   }, [design]);
 
-  // door frame + leaf install together with the door plate, after the robot left
+  // door frame + leaf install together with the door plate, after the robot
+  // left. The shelter has NO door (its open front is the entrance) — interior
+  // floor and light still render, only the portal block is skipped.
   const exitDone = useSimStore((s) => s.exitDone);
-  const showDoor = exitDone;
+  const showDoor = exitDone && doorInfo !== null;
   const showInterior = cursor > 0;
   const buildRatio = steps.length > 0 ? cursor / steps.length : 0;
   const glassFront = design.glassFront;
   const sideGlassFront = design.sideGlassFront;
   const slabY = design.floorSlabY;
-  const yOff = -design.config.cutRatio * design.config.radius;
+  const r = design.config.radius;
+  const yOff = -design.config.cutRatio * r;
   const elongation = design.config.houseType === "library" ? LIBRARY_ELONGATION : 1;
 
-  if (!doorInfo) return null;
-
-  const { angle, dist, r } = doorInfo;
+  const angle = doorInfo?.angle ?? 0;
   // vestibule straddles the shell surface (front face protrudes outside);
   // use the door plate's own measured distance, exact for any shell shape
-  const doorDist = dist * 1.04;
+  const doorDist = (doorInfo?.dist ?? r) * 1.04;
   // portal scales down for small shells so it never outsizes the building
   const shellHeight = r * (1 - design.config.cutRatio);
   const pw = Math.min(2.6, r * 1.05); // portal width — overlaps the opening rim

@@ -29,6 +29,13 @@ export default function HomePage() {
         </section>
       </div>
 
+      <div className={styles.caveatCard}>
+        <p>
+          This is an experiment — a WebGL simulation, not an engineering or legal
+          tool. It (still) makes no claim to accuracy.
+        </p>
+      </div>
+
       <ProcurementSection />
 
       {/* --- Info --- */}

@@ -6,7 +6,7 @@ import * as THREE from "three";
 import RobotArm, { RobotArmHandle, RobotPose, HOME_POSE, TUCK_POSE, solveIK } from "./RobotArm";
 import { useSimStore } from "@/lib/store";
 import { Plate } from "@/lib/shell/types";
-import { computeStations, stationForPlate, Station } from "@/lib/shell/stations";
+import { computeStations, stationForPlate, depotLayout, Station } from "@/lib/shell/stations";
 import { mastFor } from "@/lib/robot";
 
 // ---------------------------------------------------------------------------
@@ -17,12 +17,6 @@ import { mastFor } from "@/lib/robot";
 // station nearest the target, places, and returns. All hot-path values live
 // in refs; the store only receives discrete "plate placed" events.
 // ---------------------------------------------------------------------------
-
-// depot equipment around the central stand (station[0] is always {0,0})
-export const PALLET_POS = new THREE.Vector3(1.25, 0, 0.45);
-export const MILL_POS = new THREE.Vector3(1.15, 0, -1.0);
-const PICKUP_POINT = new THREE.Vector3(1.25, 0.75, 0.45);
-const MILL_POINT = new THREE.Vector3(1.15, 0.85, -1.0);
 
 /** ground speed while repositioning, m/s (scaled by sim speed) */
 const DRIVE_SPEED = 1.2;
@@ -144,6 +138,7 @@ export default function BuildSimulation() {
   const design = useSimStore((s) => s.design);
 
   const stations = useMemo(() => computeStations(design), [design]);
+  const depot = useMemo(() => depotLayout(design), [design]);
 
   // exit path: the tracked robot drives out through the door opening
   const doorDir = useMemo(() => {
@@ -199,6 +194,10 @@ export default function BuildSimulation() {
 
         const maxExit = design.config.radius + 2.5;
         if (folded && exitDist.current < maxExit) {
+          if (exitDist.current === 0) {
+            // start the exit ride from wherever the robot currently stands
+            exitDist.current = Math.max(0.01, basePos.current.dot(doorDir));
+          }
           exitDist.current = Math.min(maxExit, exitDist.current + dt * DRIVE_SPEED * 0.6);
           const p = doorDir.clone().multiplyScalar(exitDist.current);
           basePos.current.set(p.x, 0, p.z);
@@ -232,7 +231,7 @@ export default function BuildSimulation() {
     if (isDrive(sub.current) && t.current === 0) {
       const dest =
         sub.current === "toDepot"
-          ? new THREE.Vector3(0, 0, 0)
+          ? new THREE.Vector3(depot.stand.x, 0, depot.stand.z)
           : new THREE.Vector3(station.x, 0, station.z);
       startDrive(dest);
     }
@@ -255,11 +254,13 @@ export default function BuildSimulation() {
       const travelPose = sub.current === "toStation" ? CARRY_POSE : TUCK_POSE;
       currentPose.current = lerpPose(currentPose.current, travelPose, Math.min(1, dt * speed * 2));
     } else {
+      const pickupPoint = new THREE.Vector3(depot.pickup.x, depot.pickup.y, depot.pickup.z);
+      const millPoint = new THREE.Vector3(depot.millPoint.x, depot.millPoint.y, depot.millPoint.z);
       const targetPose: Record<Exclude<SubPhase, "toDepot" | "toStation">, RobotPose> = {
-        reachPallet: poseFor(PICKUP_POINT, basePos.current, baseYaw.current),
-        grab: poseFor(PICKUP_POINT.clone().setY(0.45), basePos.current, baseYaw.current),
-        toMill: poseFor(MILL_POINT, basePos.current, baseYaw.current),
-        mill: poseFor(MILL_POINT.clone().setY(0.7), basePos.current, baseYaw.current),
+        reachPallet: poseFor(pickupPoint, basePos.current, baseYaw.current),
+        grab: poseFor(pickupPoint.clone().setY(0.45), basePos.current, baseYaw.current),
+        toMill: poseFor(millPoint, basePos.current, baseYaw.current),
+        mill: poseFor(millPoint.clone().setY(0.7), basePos.current, baseYaw.current),
         carryUp: CARRY_POSE,
         toTarget: poseFor(
           targetCentroid.clone().sub(

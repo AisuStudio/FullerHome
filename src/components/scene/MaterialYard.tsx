@@ -1,19 +1,22 @@
 "use client";
 
+import { useMemo } from "react";
 import { useSimStore } from "@/lib/store";
-import { PALLET_POS, MILL_POS } from "./BuildSimulation";
+import { depotLayout } from "@/lib/shell/stations";
 
 // ---------------------------------------------------------------------------
-// Central material depot: raw-plate pallet + compact CNC milling station,
-// crane-delivered through the still-open crown before shell work starts.
-// Sized to fit inside even the smallest shelter footprint. Stacks shrink as
-// plates are consumed by the build.
+// Material depot: raw-plate pallet + compact CNC milling station. For closed
+// shells it sits at the center (crane-delivered through the still-open crown
+// before shell work starts); the open shelter is served from the forecourt.
+// Stacks shrink as plates are consumed by the build.
 // ---------------------------------------------------------------------------
 
 export default function MaterialYard() {
   const phase = useSimStore((s) => s.phase);
   const cursor = useSimStore((s) => s.cursor);
   const steps = useSimStore((s) => s.steps);
+  const design = useSimStore((s) => s.design);
+  const depot = useMemo(() => depotLayout(design), [design]);
 
   if (phase === "planning") return null;
 
@@ -23,7 +26,7 @@ export default function MaterialYard() {
   return (
     <group>
       {/* --- pallet with raw plates --- */}
-      <group position={[PALLET_POS.x, 0, PALLET_POS.z]}>
+      <group position={[depot.pallet.x, 0, depot.pallet.z]}>
         <mesh position={[0, 0.05, 0]} receiveShadow>
           <boxGeometry args={[1.3, 0.1, 1.0]} />
           <meshStandardMaterial color="#7a5c28" roughness={0.9} />
@@ -43,7 +46,7 @@ export default function MaterialYard() {
       </group>
 
       {/* --- compact on-site CNC milling station --- */}
-      <group position={[MILL_POS.x, 0, MILL_POS.z]}>
+      <group position={[depot.mill.x, 0, depot.mill.z]}>
         {/* machine bed */}
         <mesh position={[0, 0.3, 0]} castShadow receiveShadow>
           <boxGeometry args={[1.1, 0.6, 0.8]} />

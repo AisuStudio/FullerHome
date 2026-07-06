@@ -62,6 +62,45 @@ export function computeStations(design: ShellDesign): Station[] {
   return stations;
 }
 
+export interface DepotLayout {
+  /** where the robot parks to work the depot */
+  stand: Station;
+  /** pallet mesh position (ground) */
+  pallet: Vec3;
+  /** arm target when picking a plate */
+  pickup: Vec3;
+  /** mill mesh position (ground) */
+  mill: Vec3;
+  /** arm target while milling */
+  millPoint: Vec3;
+}
+
+/**
+ * Material depot placement. Closed shells (office, library) get their depot
+ * crane-delivered to the CENTER through the still-open crown; the open
+ * shelter ("Muschel") is served from the forecourt in front of its opening.
+ */
+export function depotLayout(design: ShellDesign): DepotLayout {
+  if (design.config.houseType === "shelter") {
+    const r = design.config.radius;
+    const zf = r + 2.2;
+    return {
+      stand: { x: 0, z: r + 1.6 },
+      pallet: { x: 1.0, y: 0, z: zf },
+      pickup: { x: 1.0, y: 0.75, z: zf },
+      mill: { x: -1.2, y: 0, z: zf },
+      millPoint: { x: -1.2, y: 0.85, z: zf },
+    };
+  }
+  return {
+    stand: { x: 0, z: 0 },
+    pallet: { x: 1.25, y: 0, z: 0.45 },
+    pickup: { x: 1.25, y: 0.75, z: 0.45 },
+    mill: { x: 1.15, y: 0, z: -1.0 },
+    millPoint: { x: 1.15, y: 0.85, z: -1.0 },
+  };
+}
+
 /** the station closest to a plate AMONG those that can actually reach it
  * (falls back to nearest overall — sequencing still works, arm just clamps) */
 export function stationForPlate(stations: Station[], plateCentroid: Vec3): Station {

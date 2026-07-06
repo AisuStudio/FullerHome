@@ -23,8 +23,9 @@ export default function DimensionLine() {
   // library width is cut on +x, so the measured span is asymmetric
   const xMin = -r;
   const xMax = design.config.houseType === "library" ? r * 0.4 : r;
-  // place the line just in front of the footprint's +z extent
-  const z = r * elongation + 1.4;
+  // place the line just in front of the footprint's +z extent; the shelter's
+  // forecourt depot sits there, so give it extra clearance
+  const z = design.config.houseType === "shelter" ? r + 3.6 : r * elongation + 1.4;
   const y = 0.03;
   const span = xMax - xMin;
   const mid = (xMin + xMax) / 2;

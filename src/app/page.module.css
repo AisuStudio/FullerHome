@@ -9,6 +9,19 @@
   margin: 0 auto;
 }
 
+.caveatCard {
+  margin: 20px 28px;
+  padding: 14px 20px;
+  border-radius: 10px;
+  background: var(--color-accent);
+}
+
+.caveatCard p {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-blueberry);
+}
+
 .split {
   position: relative;
   z-index: 2;
