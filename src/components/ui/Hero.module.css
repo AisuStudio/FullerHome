@@ -1,0 +1,72 @@
+.hero {
+  position: relative;
+  min-height: 60vh;
+  background-size: cover;
+  background-position: center 55%;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* aligns the overlay content to the same 1000px column as the rest of the
+   page, while the photo itself (.hero) stays full-bleed */
+.inner {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+/* guarantees legible contrast for the beige text regardless of the photo */
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    rgba(15, 15, 20, 0.62) 0%,
+    rgba(15, 15, 20, 0.4) 38%,
+    rgba(15, 15, 20, 0.08) 65%
+  );
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  padding: 48px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 28px;
+}
+
+.logo {
+  height: 84px;
+  width: auto;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.text {
+  width: 50%;
+  font-size: 1.5rem;
+  line-height: 1.35;
+  color: var(--color-vanilla);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 900px) {
+  .text {
+    font-size: 1.25rem;
+  }
+  .logo {
+    height: 60px;
+  }
+}

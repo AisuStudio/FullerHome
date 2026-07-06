@@ -47,10 +47,30 @@
   color: var(--color-on-accent);
 }
 
+.clientLine {
+  font-size: 11px;
+  color: var(--color-muted);
+  margin-top: -6px;
+}
+
+.clientLine strong {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
 .budgetCol {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.rangeLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--color-muted);
+  margin-top: -6px;
+  font-variant-numeric: tabular-nums;
 }
 
 .budgetHeader {

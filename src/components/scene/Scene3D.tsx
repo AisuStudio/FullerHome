@@ -6,7 +6,9 @@ import ShellStructure from "./ShellStructure";
 import BuildSimulation from "./BuildSimulation";
 import MaterialYard from "./MaterialYard";
 import DoorAndInterior from "./DoorAndInterior";
+import DimensionLine from "./DimensionLine";
 import { useSimStore } from "@/lib/store";
+import { LIBRARY_ELONGATION } from "@/lib/shell/generate";
 
 export default function Scene3D() {
   const design = useSimStore((s) => s.design);
@@ -54,8 +56,12 @@ export default function Scene3D() {
         infiniteGrid
       />
 
-      {/* foundation ring marker */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.005, 0]}>
+      {/* foundation ring marker — stretched along Z for the elongated library plan */}
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        scale={[1, design.config.houseType === "library" ? LIBRARY_ELONGATION : 1, 1]}
+        position={[0, 0.005, 0]}
+      >
         <ringGeometry args={[design.config.radius - 0.35, design.config.radius + 0.15, 64]} />
         <meshStandardMaterial color="#b8b6aa" />
       </mesh>
@@ -70,6 +76,7 @@ export default function Scene3D() {
       <BuildSimulation />
       <MaterialYard />
       <DoorAndInterior />
+      <DimensionLine />
 
       <OrbitControls
         makeDefault

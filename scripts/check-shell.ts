@@ -42,8 +42,8 @@ for (const detail of [1, 2, 3]) {
 console.log("all checks passed");
 
 // house types
-for (const houseType of ["iglu", "panorama", "loft"] as const) {
-  const d = generateShell({ houseType, ...(houseType === "loft" ? { cutRatio: -0.32 } : {}) });
+for (const houseType of ["shelter", "office", "library"] as const) {
+  const d = generateShell({ houseType, ...(houseType === "library" ? { cutRatio: -0.32 } : {}) });
   const s = sequenceBuild(d);
   const errs = validateSequence(d, s);
   console.log(`type=${houseType}: ${d.plates.length} plates, rings=${d.rings}, glassFront=${!!d.glassFront}, slab=${d.floorSlabY ?? "-"}`);

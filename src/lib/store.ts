@@ -5,17 +5,23 @@ import {
   configForBudget,
   computeCosts,
   CostBreakdown,
+  TYPE_BUDGET,
 } from "./shell/generate";
 import { sequenceBuild } from "./shell/sequence";
+import { Bundesland } from "./vergabe/types";
 
 export type SimPhase = "planning" | "delivery" | "building" | "done";
 
-const DEFAULT_BUDGET = 320_000;
+const DEFAULT_HOUSE_TYPE: HouseType = "shelter";
+/** midpoint of the type's own budget range makes a sensible default per type */
+const defaultBudgetFor = (t: HouseType) =>
+  Math.round((TYPE_BUDGET[t].min + TYPE_BUDGET[t].max) / 2);
 
 interface SimState {
   phase: SimPhase;
   budget: number;
   houseType: HouseType;
+  bundesland: Bundesland;
   design: ShellDesign;
   steps: BuildStep[];
   costs: CostBreakdown;
@@ -28,6 +34,7 @@ interface SimState {
 
   setBudget: (budget: number) => void;
   setHouseType: (t: HouseType) => void;
+  setBundesland: (b: Bundesland) => void;
   setExitDone: () => void;
   startDelivery: () => void;
   startBuild: () => void;
@@ -45,12 +52,14 @@ function build(budget: number, houseType: HouseType) {
   return { design, steps, costs };
 }
 
-const initial = build(DEFAULT_BUDGET, "iglu");
+const initialBudget = defaultBudgetFor(DEFAULT_HOUSE_TYPE);
+const initial = build(initialBudget, DEFAULT_HOUSE_TYPE);
 
 export const useSimStore = create<SimState>((set, get) => ({
   phase: "planning",
-  budget: DEFAULT_BUDGET,
-  houseType: "iglu",
+  budget: initialBudget,
+  houseType: DEFAULT_HOUSE_TYPE,
+  bundesland: "berlin",
   ...initial,
   cursor: 0,
   speed: 3,
@@ -64,10 +73,14 @@ export const useSimStore = create<SimState>((set, get) => ({
 
   setHouseType: (houseType) => {
     if (get().phase !== "planning") return;
-    set({ houseType, ...build(get().budget, houseType), cursor: 0, exitDone: false });
+    // each typology has its own budget range — switching type resets budget
+    // to that type's midpoint rather than keeping a now out-of-range number
+    const budget = defaultBudgetFor(houseType);
+    set({ houseType, budget, ...build(budget, houseType), cursor: 0, exitDone: false });
   },
 
   setExitDone: () => set({ exitDone: true }),
+  setBundesland: (bundesland) => set({ bundesland }),
 
   startDelivery: () => set({ phase: "delivery" }),
   startBuild: () => set({ phase: "building", paused: false }),

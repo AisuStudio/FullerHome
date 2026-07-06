@@ -1,14 +1,15 @@
 "use client";
 
 import { useSimStore } from "@/lib/store";
+import { buildingDims } from "@/lib/shell/generate";
 import styles from "./Datasheet.module.css";
 
 const euro = (n: number) => "€" + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
 
 const TYPE_LABELS: Record<string, { label: string; desc: string }> = {
-  iglu: { label: "Igloo", desc: "Classic dome" },
-  panorama: { label: "Panorama", desc: "Straight glass front" },
-  loft: { label: "Loft", desc: "Two levels" },
+  shelter: { label: "Weather Shelter", desc: "Small park pavilion" },
+  office: { label: "Tourism Office", desc: "Glazed street front" },
+  library: { label: "Library", desc: "Two-level branch library" },
 };
 
 /** Live datasheet — always reflects the current configuration in the sim above */
@@ -18,6 +19,7 @@ export default function Datasheet() {
   const houseType = useSimStore((s) => s.houseType);
 
   const t = TYPE_LABELS[houseType];
+  const dims = buildingDims(design);
 
   return (
     <div className={styles.sheet}>
@@ -31,7 +33,7 @@ export default function Datasheet() {
           <h4>Building</h4>
           <dl className={styles.specList}>
             <div><dt>Type</dt><dd>{t.label} — {t.desc}</dd></div>
-            <div><dt>Radius / height</dt><dd>{design.config.radius.toFixed(1)} m / ~{(design.config.radius * (houseType === "loft" ? 1.3 : 1.0)).toFixed(1)} m</dd></div>
+            <div><dt>Footprint / height</dt><dd>{dims.widthM} × {dims.lengthM} m / {dims.heightM} m</dd></div>
             <div><dt>Floor area</dt><dd>{costs.floorAreaM2} m² {design.floorSlabY !== undefined ? "(2 levels)" : ""}</dd></div>
             <div><dt>Shell surface</dt><dd>{costs.shellAreaM2} m²</dd></div>
           </dl>
@@ -73,12 +75,12 @@ export default function Datasheet() {
       </div>
 
       <p className={styles.sheetNote}>
-        Rough estimates illustrating the parametric model — not quotes. Typical 2026
-        ranges (Germany): fabricated CLT shell €350–550/m², insulated glazing
-        €500–900/m², slab foundation €150–250/m², interior fit-out €1,100–1,800/m²,
-        utilities connection €18–35k, planning &amp; permits 6–12%. Comparable turnkey
-        small houses land at €2,800–4,500 per m² of floor area. Excludes insulation
-        layer / energy-code compliance and the permitting phase.
+        Rough estimates illustrating the parametric model — not quotes. Footprint is
+        fixed per typology; a higher budget buys a higher spec tier (shell, foundation,
+        systems, fit-out), not more floor area — a park shelter and a branch library
+        sit at very different construction-quality bands, not different sizes. cf. BKI
+        construction cost data. Excludes insulation layer / energy-code compliance and
+        the permitting phase (see Procurement section below for that timeline).
       </p>
     </div>
   );

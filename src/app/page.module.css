@@ -3,49 +3,22 @@
   width: 100%;
 }
 
-.siteHeader {
-  background: var(--color-vanilla);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.siteHeaderInner {
-  padding: 28px 24px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.siteBrand {
-  display: flex;
-  align-items: center;
-}
-
-.siteLogoImg {
-  height: 64px;
-  width: auto;
-  display: block;
-}
-
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
-
-.siteDesc {
-  max-width: 720px;
-  font-size: 1rem;
-  line-height: 1.65;
-  color: var(--color-blueberry);
+/* everything except Hero is capped to a readable page width */
+.pageWrap {
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .split {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: stretch;
   min-height: 78vh;
+  margin-top: -64px;
+  border-radius: 16px 16px 0 0;
+  overflow: hidden;
+  box-shadow: 0 -12px 32px rgba(15, 15, 20, 0.25);
 }
 
 .leftCol {
@@ -90,16 +63,15 @@
 }
 
 .infoInner {
-  max-width: 860px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 72px 28px 48px;
 }
 
 .infoInner h2 {
   font-family: var(--font-mono);
-  font-size: 22px;
+  font-size: 1.5rem;
   font-weight: 700;
-  letter-spacing: 0.01em;
   color: var(--color-text);
   margin: 48px 0 16px;
 }

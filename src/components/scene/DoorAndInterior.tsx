@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import * as THREE from "three";
 import { useSimStore } from "@/lib/store";
+import { LIBRARY_ELONGATION } from "@/lib/shell/generate";
 
 // ---------------------------------------------------------------------------
 // Real door (frame + glass leaf) in the door opening, plus interior: wood
@@ -18,12 +19,15 @@ export default function DoorAndInterior() {
   const doorInfo = useMemo(() => {
     const doorPlate = design.plates.find((p) => p.isDoor);
     if (!doorPlate) return null;
-    // derive position from the ACTUAL door plate, not the requested angle —
-    // the chosen plate can sit tens of degrees away from config.doorAngle
+    // derive position from the ACTUAL door plate, not the requested angle or
+    // a formula-based radius — the chosen plate can sit tens of degrees away
+    // from config.doorAngle, and for an elongated shell (library) a fixed
+    // radius fraction wouldn't match the true (non-circular) surface anyway
     const c = doorPlate.centroid;
     const angle = Math.atan2(c.x, c.z);
+    const dist = Math.sqrt(c.x * c.x + c.z * c.z);
     const r = design.config.radius;
-    return { angle, r };
+    return { angle, dist, r };
   }, [design]);
 
   // door frame + leaf install together with the door plate, after the robot left
@@ -32,23 +36,35 @@ export default function DoorAndInterior() {
   const showInterior = cursor > 0;
   const buildRatio = steps.length > 0 ? cursor / steps.length : 0;
   const glassFront = design.glassFront;
+  const sideGlassFront = design.sideGlassFront;
   const slabY = design.floorSlabY;
   const yOff = -design.config.cutRatio * design.config.radius;
+  const elongation = design.config.houseType === "library" ? LIBRARY_ELONGATION : 1;
 
   if (!doorInfo) return null;
 
-  const { angle, r } = doorInfo;
-  // vestibule straddles the shell surface (front face protrudes outside)
-  const doorDist = r * 0.96;
-  const doorW = 1.15;
-  const doorH = 2.15;
+  const { angle, dist, r } = doorInfo;
+  // vestibule straddles the shell surface (front face protrudes outside);
+  // use the door plate's own measured distance, exact for any shell shape
+  const doorDist = dist * 1.04;
+  // portal scales down for small shells so it never outsizes the building
+  const shellHeight = r * (1 - design.config.cutRatio);
+  const pw = Math.min(2.6, r * 1.05); // portal width — overlaps the opening rim
+  const ph = Math.min(2.8, shellHeight - 0.25); // portal height
+  const doorW = Math.min(1.15, pw - 0.6);
+  const doorH = Math.min(2.15, ph - 0.35);
   const frameT = 0.09;
 
   return (
     <group>
-      {/* interior: wood floor */}
+      {/* interior: wood floor (stretched along Z for the elongated library plan) */}
       {showInterior && (
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
+        <mesh
+          rotation={[-Math.PI / 2, 0, 0]}
+          scale={[1, elongation, 1]}
+          position={[0, 0.02, 0]}
+          receiveShadow
+        >
           <circleGeometry args={[r * 0.9, 48]} />
           <meshStandardMaterial color="#c4a066" roughness={0.65} />
         </mesh>
@@ -106,8 +122,55 @@ export default function DoorAndInterior() {
         </group>
       )}
 
-      {/* loft: second-floor slab + stairs, prefab modules lowered in through
-          the still-open crown — visualized as staged appearance with build progress */}
+      {/* library: long-side panorama window (elongated semi-ellipse — the
+          "Fensterfront an der langen Seite" giving a view out from the
+          reading room, mirroring the office's straight glass front on the X
+          axis instead of Z, with mullions running along the long Z side) */}
+      {sideGlassFront && buildRatio > 0.75 && (
+        <group position={[sideGlassFront.dist, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+          {(() => {
+            const halfLen = sideGlassFront.rc * elongation;
+            const strips: React.ReactNode[] = [];
+            const w = 0.7;
+            const n = Math.floor((halfLen * 2) / w);
+            for (let i = 0; i < n; i++) {
+              const xLocal = -halfLen + w / 2 + i * w;
+              // ellipse boundary: (xLocal/halfLen)^2 + (y/rc)^2 = 1
+              const frac = 1 - (xLocal / halfLen) ** 2;
+              if (frac <= 0.02) continue;
+              const h = sideGlassFront.rc * Math.sqrt(frac) + yOff;
+              strips.push(
+                <group key={i}>
+                  <mesh position={[xLocal, h / 2, 0]} castShadow>
+                    <boxGeometry args={[w - 0.08, h, 0.05]} />
+                    <meshPhysicalMaterial
+                      color="#cfe4f0"
+                      transparent
+                      opacity={0.32}
+                      roughness={0.05}
+                      side={THREE.DoubleSide}
+                    />
+                  </mesh>
+                  <mesh position={[xLocal + w / 2, (h * 0.97) / 2, 0]} castShadow>
+                    <boxGeometry args={[0.07, h * 0.97, 0.09]} />
+                    <meshStandardMaterial color="#4a3a22" roughness={0.7} />
+                  </mesh>
+                </group>
+              );
+            }
+            return strips;
+          })()}
+          <mesh position={[0, 0.05, 0]} receiveShadow>
+            <boxGeometry args={[sideGlassFront.rc * elongation * 2 + 0.2, 0.1, 0.25]} />
+            <meshStandardMaterial color="#4a3a22" roughness={0.7} />
+          </mesh>
+        </group>
+      )}
+
+      {/* library: second-floor slab + stairs, prefab modules lowered in
+          through the still-open crown — visualized as staged appearance with
+          build progress; whole assembly stretched along Z with the elongated
+          plan */}
       {slabY !== undefined && buildRatio > 0.55 && (() => {
         const r2sq = r * r - (slabY - yOff) * (slabY - yOff);
         if (r2sq <= 1) return null;
@@ -116,7 +179,7 @@ export default function DoorAndInterior() {
         const stairProgress = Math.min(1, Math.max(0, (buildRatio - 0.55) / 0.25));
         const visibleSteps = Math.floor(stairProgress * 10);
         return (
-          <group position={[0, slabY, 0]}>
+          <group position={[0, slabY, 0]} scale={[1, 1, elongation]}>
             <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow castShadow>
               <ringGeometry args={[1.1, r2, 48]} />
               <meshStandardMaterial color="#c4a066" roughness={0.65} side={THREE.DoubleSide} />
@@ -160,8 +223,6 @@ export default function DoorAndInterior() {
           rotation={[0, angle, 0]}
         >
           {(() => {
-            const pw = 2.6; // portal width — overlaps the opening rim
-            const ph = 2.8; // portal height
             const pd = 1.1; // depth, straddling the shell surface
             const post = 0.14;
             const wood = <meshStandardMaterial color="#6B4A26" roughness={0.7} />;

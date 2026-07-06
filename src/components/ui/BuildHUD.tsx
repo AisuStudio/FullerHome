@@ -12,10 +12,16 @@ const PHASE_LABELS: { key: string; label: string }[] = [
   { key: "done", label: "Complete" },
 ];
 
-export const HOUSE_TYPES: { key: HouseType; label: string; desc: string }[] = [
-  { key: "iglu", label: "Igloo", desc: "Classic dome" },
-  { key: "panorama", label: "Panorama", desc: "Straight glass front" },
-  { key: "loft", label: "Loft", desc: "Two levels" },
+export const HOUSE_TYPES: {
+  key: HouseType;
+  label: string;
+  desc: string;
+  /** who commissions this typology, in the simulation's framing */
+  client: string;
+}[] = [
+  { key: "shelter", label: "Weather Shelter", desc: "Small park pavilion", client: "District parks department" },
+  { key: "office", label: "Tourism Office", desc: "Glazed street front", client: "Municipality / tourism board" },
+  { key: "library", label: "Library", desc: "Two-level branch library", client: "Municipality (branch library)" },
 ];
 
 /** Left control column: timeline, config (planning) or stats (build), controls */

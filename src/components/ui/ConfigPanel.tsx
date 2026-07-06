@@ -1,7 +1,7 @@
 "use client";
 
 import { useSimStore } from "@/lib/store";
-import { BUDGET_MIN, BUDGET_MAX } from "@/lib/shell/generate";
+import { TYPE_BUDGET, buildingDims } from "@/lib/shell/generate";
 import { HouseType } from "@/lib/shell/types";
 import { HOUSE_TYPES } from "./BuildHUD";
 import styles from "./ConfigPanel.module.css";
@@ -11,7 +11,7 @@ const euro = (n: number) => "€" + n.toLocaleString("en-US", { maximumFractionD
 function TypePreview({ type }: { type: HouseType }) {
   const wood = "#B08D57";
   const glass = "rgba(160, 205, 235, 0.55)";
-  if (type === "iglu") {
+  if (type === "shelter") {
     return (
       <svg viewBox="0 0 64 36" width="64" height="36" aria-hidden>
         <path d="M4 34 A28 28 0 0 1 60 34 Z" fill={wood} />
@@ -20,7 +20,7 @@ function TypePreview({ type }: { type: HouseType }) {
       </svg>
     );
   }
-  if (type === "panorama") {
+  if (type === "office") {
     return (
       <svg viewBox="0 0 64 36" width="64" height="36" aria-hidden>
         <path d="M4 34 A28 28 0 0 1 46 9 L46 34 Z" fill={wood} />
@@ -47,7 +47,11 @@ export default function ConfigPanel() {
   const costs = useSimStore((s) => s.costs);
   const budget = useSimStore((s) => s.budget);
   const houseType = useSimStore((s) => s.houseType);
+  const design = useSimStore((s) => s.design);
   const { setBudget, setHouseType } = useSimStore();
+  const activeType = HOUSE_TYPES.find((t) => t.key === houseType)!;
+  const range = TYPE_BUDGET[houseType];
+  const dims = buildingDims(design);
 
   return (
     <div className={styles.config}>
@@ -65,6 +69,10 @@ export default function ConfigPanel() {
         ))}
       </div>
 
+      <p className={styles.clientLine}>
+        Commissioning body: <strong>{activeType.client}</strong>
+      </p>
+
       <div className={styles.budgetCol}>
         <div className={styles.budgetHeader}>
           <span className={styles.budgetLabel}>Budget</span>
@@ -73,17 +81,23 @@ export default function ConfigPanel() {
         <input
           type="range"
           className={styles.budgetSlider}
-          min={BUDGET_MIN}
-          max={BUDGET_MAX}
-          step={5000}
+          min={range.min}
+          max={range.max}
+          step={range.step}
           value={budget}
           onChange={(e) => setBudget(Number(e.target.value))}
           aria-label="Budget"
         />
+        <div className={styles.rangeLabels}>
+          <span>{euro(range.min)}</span>
+          <span>{euro(range.max)}</span>
+        </div>
       </div>
 
         <div className={styles.statsGrid}>
           <div className={styles.stat}><span>Floor area</span><strong>{costs.floorAreaM2} m²</strong></div>
+          <div className={styles.stat}><span>Footprint</span><strong>{dims.widthM} × {dims.lengthM} m</strong></div>
+          <div className={styles.stat}><span>Height</span><strong>{dims.heightM} m</strong></div>
           <div className={styles.stat}><span>Plates</span><strong>{steps.length}</strong></div>
           <div className={styles.stat}><span>Shell (robot)</span><strong>~{costs.shellDays} day{costs.shellDays > 1 ? "s" : ""}</strong></div>
           <div className={styles.stat}><span>Fit-out</span><strong>~{costs.fitoutWeeks} wks</strong></div>
@@ -101,10 +115,10 @@ export default function ConfigPanel() {
         </div>
 
       <p className={styles.note}>
-        Fixed size per house type; budget buys build quality — plate resolution, glazing
-        share and fit-out spec (€900–1,900/m²). Rough 2026 estimates, not quotes:
-        fabricated CLT shell ≈ €420/m², insulated glazing ≈ €650/m² (cf. BKI construction
-        cost data), planning &amp; permits 8%.
+        Fixed footprint per typology; budget buys build quality — plate resolution,
+        glazing share, and shell/foundation/fit-out spec level. Rough 2026 estimates
+        for illustration, not quotes (cf. BKI construction cost data); planning &amp;
+        permits at 8% of construction cost.
       </p>
     </div>
   );

@@ -1,9 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import logo from "@/assets/fh-logo.svg";
 import BuildHUD from "@/components/ui/BuildHUD";
 import Datasheet from "@/components/ui/Datasheet";
+import Hero from "@/components/ui/Hero";
+import ProcurementSection from "@/components/ui/ProcurementSection";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import styles from "./page.module.css";
 
@@ -12,28 +13,10 @@ const Scene3D = dynamic(() => import("@/components/scene/Scene3D"), { ssr: false
 export default function HomePage() {
   return (
     <main className={styles.main}>
-      {/* --- Site header --- */}
-      <header className={styles.siteHeader}>
-        <div className={styles.siteHeaderInner}>
-          <div className={styles.siteBrand}>
-            <h1 className={styles.srOnly}>
-              FullerHome — On-Site Robotic Shell Construction Concept / WebGL Experiment
-            </h1>
-            <img
-              src={logo.src}
-              alt="FullerHome Experiment"
-              className={styles.siteLogoImg}
-            />
-          </div>
-          <p className={styles.siteDesc}>
-            A WebGL experiment inspired by the timber pavilion of the 2014
-            Landesgartenschau in Schwäbisch Gmünd: configure a plate-shell home, then
-            watch an on-site robot mill and assemble it — plate by plate, bottom up.
-          </p>
-        </div>
-      </header>
+      <Hero />
 
-      {/* --- Split: controls left, 3D right --- */}
+      <div className={styles.pageWrap}>
+      {/* --- Split: controls left, 3D right (configure + build) --- */}
       <div className={styles.split}>
         <aside className={styles.leftCol}>
           <BuildHUD />
@@ -46,10 +29,12 @@ export default function HomePage() {
         </section>
       </div>
 
+      <ProcurementSection />
+
       {/* --- Info --- */}
       <section id="info" className={styles.infoSection}>
         <div className={styles.infoInner}>
-          <h2>The idea</h2>
+          <h2>The Idea</h2>
           <p>
             Inspired by the{" "}
             <a
@@ -120,10 +105,11 @@ export default function HomePage() {
               <h3>The sweet spot</h3>
               <p>
                 Domes make most sense where their strengths matter and their weaknesses
-                don&rsquo;t: studios, workshops, holiday homes, off-grid and disaster-relief
-                housing, garden buildings — and in clusters, where several small domes
-                form a village and each dome hosts one function instead of forcing
-                room-partitions into curved geometry.
+                don&rsquo;t: park shelters, visitor and tourism offices, community rooms,
+                off-grid and disaster-relief structures — small-to-medium public buildings
+                with one open function, not room-partitioned floor plans. Which is exactly
+                why this simulation models a shelter, an office and a library rather than
+                a private home.
               </p>
             </div>
           </div>
@@ -133,9 +119,9 @@ export default function HomePage() {
             <div className={styles.card}>
               <h3>Parametric design</h3>
               <p>
-                House type + budget deterministically generate the building: Goldberg
+                Typology + budget deterministically generate the building: Goldberg
                 geometry (hexagons/pentagons as the dual of a geodesic icosahedron),
-                glazing ratio, door, bill of materials and costs. Same input → same house.
+                glazing ratio, door, bill of materials and costs. Same input → same building.
               </p>
             </div>
             <div className={styles.card}>
@@ -149,10 +135,11 @@ export default function HomePage() {
             <div className={styles.card}>
               <h3>Robot kinematics</h3>
               <p>
-                Tracked mobile robot with an articulated shoulder-elbow arm on a vertical
-                lift column, inverse kinematics in real time. Per plate: pick → CNC mill
-                → swing in → place. When the shell is complete, it simply drives out
-                through the door opening — no rails, no crane.
+                Tracked mobile robot at realistic scale (~3.5 m reach), inverse kinematics
+                in real time. It can&rsquo;t cover the shell from one spot, so it
+                repositions: per plate it drives to the central depot, picks, CNC-mills,
+                then drives to the work station nearest the target and places. When the
+                shell is complete, it drives out through the door opening.
               </p>
             </div>
           </div>
@@ -174,13 +161,15 @@ export default function HomePage() {
             HOUSE, where it built full-scale load-bearing walls on site.
           </p>
           <p>
-            Two honest gaps between the research machine and this concept: the original
-            IF carries roughly 40&nbsp;kg at 2.55&nbsp;m reach — our beech plates weigh
-            50–80&nbsp;kg, so a real deployment would need the next payload class (or two
-            robots sharing the load). And our vertical lift column is a concept extension:
-            the IF itself reaches height by repositioning, not by telescoping. Both are
-            engineering steps, not research questions — which is exactly what makes
-            on-site robotic assembly feel close.
+            The simulation now works the way the real machine does: it{" "}
+            <strong>repositions</strong> — driving between a handful of work stations
+            inside the footprint, because its arm can&rsquo;t cover the whole shell from
+            one spot. Two honest gaps remain: the original IF carries roughly 40&nbsp;kg
+            at 2.55&nbsp;m reach — our beech plates weigh 50–80&nbsp;kg, so a real
+            deployment would need the next payload class (or two robots sharing the
+            load). And the telescoping vertical lift column is a concept extension.
+            Both are engineering steps, not research questions — which is exactly what
+            makes on-site robotic assembly feel close.
           </p>
 
           <h2>Simulation vs. reality</h2>
@@ -245,6 +234,7 @@ export default function HomePage() {
           </footer>
         </div>
       </section>
+      </div>
     </main>
   );
 }

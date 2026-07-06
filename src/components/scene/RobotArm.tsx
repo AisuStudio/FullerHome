@@ -2,18 +2,16 @@
 
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import * as THREE from "three";
+import { L1, L2, BASE_Y } from "@/lib/robot";
 
 // ---------------------------------------------------------------------------
-// Modeled after the In-situ Fabricator (ETH Zurich, NCCR Digital Fabrication):
-// tracked mobile base + articulated 2-link arm. Concept extensions for this
-// sim: vertical lift column and a heavier vacuum gripper.
-// Posed imperatively per frame via ref.
+// Modeled after the In-situ Fabricator (ETH Zurich, NCCR Digital Fabrication)
+// at realistic scale: tracked mobile base (~1.5m long) + articulated 2-link
+// arm (~3.5m reach). Concept extensions declared in the page text: telescoping
+// vertical lift column and a heavier vacuum gripper.
+// Kinematic constants live in src/lib/robot.ts (shared with the station
+// planner and check scripts). Posed imperatively per frame via ref.
 // ---------------------------------------------------------------------------
-
-export const L1 = 3.4; // upper arm
-export const L2 = 3.2; // forearm
-/** height of the slew ring above ground (tracks + body) */
-export const BASE_Y = 0.95;
 
 export interface RobotPose {
   yaw: number;
@@ -31,15 +29,15 @@ export interface RobotArmHandle {
 
 export const HOME_POSE: RobotPose = {
   yaw: 0,
-  mastHeight: 1.6,
+  mastHeight: 0.9,
   shoulder: 0.9,
   elbow: -1.8,
 };
 
-/** folded flat (~1.5m tall) so the robot fits through the door opening */
-export const EXIT_POSE: RobotPose = {
+/** folded flat (~1.2m tall) for driving and for exiting through the door */
+export const TUCK_POSE: RobotPose = {
   yaw: 0,
-  mastHeight: 0.9,
+  mastHeight: 0.8,
   shoulder: 0.12,
   elbow: -2.9,
 };
@@ -110,16 +108,16 @@ const RobotArm = forwardRef<RobotArmHandle>(function RobotArm(_props, ref) {
   return (
     <group>
       {/* crawler tracks */}
-      {[-0.75, 0.75].map((x) => (
-        <group key={x} position={[x, 0.28, 0]}>
+      {[-0.48, 0.48].map((x) => (
+        <group key={x} position={[x, 0.18, 0]}>
           <mesh castShadow receiveShadow>
-            <boxGeometry args={[0.42, 0.5, 2.3]} />
+            <boxGeometry args={[0.28, 0.32, 1.5]} />
             {track}
           </mesh>
           {/* drive wheels hint */}
-          {[-0.85, 0, 0.85].map((z) => (
-            <mesh key={z} position={[0, -0.05, z]} rotation-z={Math.PI / 2}>
-              <cylinderGeometry args={[0.16, 0.16, 0.46, 12]} />
+          {[-0.55, 0, 0.55].map((z) => (
+            <mesh key={z} position={[0, -0.03, z]} rotation-z={Math.PI / 2}>
+              <cylinderGeometry args={[0.1, 0.1, 0.3, 12]} />
               <meshStandardMaterial color="#3a3a3e" metalness={0.6} roughness={0.4} />
             </mesh>
           ))}
@@ -127,78 +125,78 @@ const RobotArm = forwardRef<RobotArmHandle>(function RobotArm(_props, ref) {
       ))}
 
       {/* body: power pack + control unit */}
-      <mesh position={[0, 0.72, 0]} castShadow>
-        <boxGeometry args={[1.7, 0.45, 2.0]} />
+      <mesh position={[0, 0.47, 0]} castShadow>
+        <boxGeometry args={[1.1, 0.3, 1.3]} />
         {steel}
       </mesh>
-      <mesh position={[0, 0.99, -0.6]} castShadow>
-        <boxGeometry args={[1.5, 0.35, 0.7]} />
+      <mesh position={[0, 0.66, -0.4]} castShadow>
+        <boxGeometry args={[0.95, 0.24, 0.45]} />
         {dark}
       </mesh>
       {/* warning beacon */}
-      <mesh position={[0.6, 1.05, -0.85]}>
-        <cylinderGeometry args={[0.05, 0.05, 0.14, 8]} />
+      <mesh position={[0.38, 0.7, -0.56]}>
+        <cylinderGeometry args={[0.035, 0.035, 0.1, 8]} />
         <meshStandardMaterial color="#e8a030" emissive="#e8a030" emissiveIntensity={0.6} />
       </mesh>
 
       <group ref={turretRef} position={[0, BASE_Y, 0]}>
         {/* slew ring */}
-        <mesh position={[0, 0.08, 0]} castShadow>
-          <cylinderGeometry args={[0.42, 0.48, 0.18, 20]} />
+        <mesh position={[0, 0.05, 0]} castShadow>
+          <cylinderGeometry args={[0.27, 0.31, 0.12, 20]} />
           {dark}
         </mesh>
 
         {/* vertical lift column (unit height, scaled) — concept extension of the IF */}
         <mesh ref={mastRef} castShadow>
-          <boxGeometry args={[0.4, 1, 0.4]} />
+          <boxGeometry args={[0.26, 1, 0.26]} />
           {steel}
         </mesh>
 
         {/* shoulder joint */}
         <group ref={shoulderRef}>
           <mesh castShadow rotation-z={Math.PI / 2}>
-            <cylinderGeometry args={[0.3, 0.3, 0.55, 16]} />
+            <cylinderGeometry args={[0.18, 0.18, 0.34, 16]} />
             {dark}
           </mesh>
 
           {/* upper arm along +z */}
           <mesh position={[0, 0, L1 / 2]} castShadow>
-            <boxGeometry args={[0.3, 0.38, L1]} />
+            <boxGeometry args={[0.18, 0.23, L1]} />
             {white}
           </mesh>
           {/* hydraulic detail */}
-          <mesh position={[0, 0.26, L1 * 0.35]} castShadow rotation-x={Math.PI / 2}>
-            <cylinderGeometry args={[0.06, 0.06, L1 * 0.6, 8]} />
+          <mesh position={[0, 0.16, L1 * 0.35]} castShadow rotation-x={Math.PI / 2}>
+            <cylinderGeometry args={[0.04, 0.04, L1 * 0.6, 8]} />
             {steel}
           </mesh>
 
           {/* elbow */}
           <group position={[0, 0, L1]} ref={elbowRef}>
             <mesh castShadow rotation-z={Math.PI / 2}>
-              <cylinderGeometry args={[0.24, 0.24, 0.5, 16]} />
+              <cylinderGeometry args={[0.14, 0.14, 0.3, 16]} />
               {dark}
             </mesh>
 
             {/* forearm */}
             <mesh position={[0, 0, L2 / 2]} castShadow>
-              <boxGeometry args={[0.22, 0.28, L2]} />
+              <boxGeometry args={[0.13, 0.17, L2]} />
               {white}
             </mesh>
 
             {/* wrist + vacuum gripper */}
             <group position={[0, 0, L2]}>
               <mesh castShadow>
-                <sphereGeometry args={[0.16, 12, 12]} />
+                <sphereGeometry args={[0.1, 12, 12]} />
                 {dark}
               </mesh>
-              <mesh position={[0, 0, 0.14]} castShadow rotation-x={Math.PI / 2}>
-                <cylinderGeometry args={[0.2, 0.2, 0.07, 12]} />
+              <mesh position={[0, 0, 0.09]} castShadow rotation-x={Math.PI / 2}>
+                <cylinderGeometry args={[0.13, 0.13, 0.05, 12]} />
                 {steel}
               </mesh>
-              {[-0.1, 0.1].map((x) =>
-                [-0.1, 0.1].map((y) => (
-                  <mesh key={`${x},${y}`} position={[x, y, 0.2]} rotation-x={Math.PI / 2}>
-                    <cylinderGeometry args={[0.035, 0.05, 0.05, 8]} />
+              {[-0.065, 0.065].map((x) =>
+                [-0.065, 0.065].map((y) => (
+                  <mesh key={`${x},${y}`} position={[x, y, 0.13]} rotation-x={Math.PI / 2}>
+                    <cylinderGeometry args={[0.023, 0.033, 0.035, 8]} />
                     <meshStandardMaterial color="#333" roughness={0.6} />
                   </mesh>
                 ))

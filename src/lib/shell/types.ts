@@ -23,7 +23,8 @@ export interface Plate {
   isDoor: boolean;
 }
 
-export type HouseType = "iglu" | "panorama" | "loft";
+/** public building typologies (small → large); replaces the earlier private house types */
+export type HouseType = "shelter" | "office" | "library";
 
 export interface ShellConfig {
   houseType: HouseType;
@@ -40,6 +41,16 @@ export interface ShellConfig {
   seed: number;
   /** interior fit-out €/m² — driven by budget (basic → premium) */
   fitoutRate?: number;
+  /** fabricated + installed timber shell €/m² */
+  woodRate?: number;
+  /** insulated glazing €/m² */
+  glassRate?: number;
+  /** foundation €/m² of footprint */
+  foundationRate?: number;
+  /** grid/water/sewage connection + services core, flat */
+  utilitiesCost?: number;
+  /** robot mobilization + on-site deployment, flat */
+  robotCost?: number;
 }
 
 /** flat glazed facade (panorama type): vertical cut plane */
@@ -61,9 +72,11 @@ export interface ShellDesign {
   plates: Plate[];
   rings: number;
   bom: BillOfMaterials;
-  /** present for the panorama type */
+  /** flat street-facing glass front (office typology) */
   glassFront?: GlassFront;
-  /** y-height of the second-floor slab (loft type) */
+  /** flat panorama window on the long side (library typology) */
+  sideGlassFront?: GlassFront;
+  /** y-height of the second-floor slab (library typology) */
   floorSlabY?: number;
 }
 
@@ -75,7 +88,7 @@ export interface BuildStep {
 }
 
 export const DEFAULT_CONFIG: ShellConfig = {
-  houseType: "iglu",
+  houseType: "shelter",
   radius: 6,
   detail: 2,
   cutRatio: -0.05,

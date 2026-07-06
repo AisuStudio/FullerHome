@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FullerHome — Robotische Kuppelbauten für DACH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --graphit:#1C2B33;
+    --graphit-2:#233842;
+    --beton:#E7E4DD;
+    --beton-2:#F4F2EC;
+    --stahlblau:#3E6E8E;
+    --stahlblau-hell:#6C9DBB;
+    --kupfer:#B8763A;
+    --kupfer-hell:#D69860;
+    --ink:#151B1E;
+    --off-white:#F7F6F2;
+    --line:rgba(21,27,30,0.14);
+    --line-dark:rgba(247,246,242,0.16);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--beton-2);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:16px;
+    line-height:1.55;
+  }
+  h1,h2,h3,.disp{
+    font-family:'Space Grotesk', sans-serif;
+    letter-spacing:-0.01em;
+    margin:0;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  a{color:inherit;}
+  img,svg{display:block;max-width:100%;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+
+  /* NAV */
+  header.site{
+    position:sticky;top:0;z-index:50;
+    background:rgba(28,43,51,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line-dark);
+  }
+  nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 28px;max-width:1120px;margin:0 auto;
+  }
+  .logo{
+    color:var(--off-white);font-weight:700;font-size:1.05rem;
+    display:flex;align-items:center;gap:10px;
+  }
+  .logo .mark{width:20px;height:20px;flex:none;}
+  nav ul{list-style:none;display:flex;gap:28px;margin:0;padding:0;}
+  nav a.navlink{
+    color:var(--off-white);opacity:0.75;text-decoration:none;
+    font-size:0.92rem;font-family:'IBM Plex Mono',monospace;
+  }
+  nav a.navlink:hover{opacity:1;}
+  .navlink .num{color:var(--kupfer-hell);margin-right:6px;}
+
+  /* HERO */
+  .hero{
+    background:var(--graphit);
+    color:var(--off-white);
+    padding:88px 0 64px;
+    position:relative;
+    overflow:hidden;
+    border-bottom:1px solid var(--line-dark);
+  }
+  .hero-grid{
+    display:grid;grid-template-columns:1.15fr 0.85fr;gap:48px;align-items:center;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    color:var(--kupfer-hell);
+    font-size:0.82rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    margin-bottom:18px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{content:"";width:22px;height:1px;background:var(--kupfer-hell);display:inline-block;}
+  .hero h1{
+    font-size:clamp(2.1rem, 4vw, 3.15rem);
+    font-weight:600;
+    line-height:1.08;
+  }
+  .hero h1 em{
+    font-style:normal;color:var(--stahlblau-hell);
+  }
+  .hero p.lead{
+    margin-top:22px;max-width:46ch;
+    color:rgba(247,246,242,0.78);
+    font-size:1.05rem;
+  }
+  .hero-cta{margin-top:32px;display:flex;gap:14px;flex-wrap:wrap;}
+  .btn{
+    display:inline-block;padding:13px 22px;border-radius:2px;
+    font-family:'IBM Plex Mono',monospace;font-size:0.88rem;
+    text-decoration:none;border:1px solid transparent;
+  }
+  .btn-primary{background:var(--kupfer);color:var(--graphit);font-weight:600;}
+  .btn-primary:hover{background:var(--kupfer-hell);}
+  .btn-ghost{border-color:var(--line-dark);color:var(--off-white);}
+  .btn-ghost:hover{border-color:var(--stahlblau-hell);}
+
+  /* geodesic dome build svg */
+  .dome-wrap{position:relative;aspect-ratio:1/0.85;}
+  .facet{
+    fill:var(--graphit-2);
+    stroke:var(--stahlblau-hell);
+    stroke-width:0.6;
+    opacity:0;
+    transform-origin:center;
+    animation:facetIn 0.7s ease forwards;
+  }
+  .facet.copper{fill:rgba(184,118,58,0.18);}
+  @keyframes facetIn{
+    from{opacity:0;transform:translateY(14px) scale(0.92);}
+    to{opacity:1;transform:translateY(0) scale(1);}
+  }
+
+  section{padding:76px 0;}
+  .section-head{max-width:62ch;margin-bottom:44px;}
+  .section-head .eyebrow{color:var(--stahlblau);}
+  .section-head .eyebrow::before{background:var(--stahlblau);}
+  .section-head h2{font-size:clamp(1.6rem,2.6vw,2.1rem);font-weight:600;}
+  .section-head p{margin-top:14px;color:rgba(21,27,30,0.72);font-size:1.02rem;}
+
+  /* PROZESS / LEAN TAKT */
+  .takt{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:1px;
+    background:var(--line);border:1px solid var(--line);
+  }
+  .takt-step{
+    background:var(--beton-2);padding:26px 20px;position:relative;
+  }
+  .takt-step .idx{
+    font-family:'IBM Plex Mono',monospace;color:var(--kupfer);
+    font-size:0.8rem;margin-bottom:14px;display:block;
+  }
+  .takt-step h3{font-size:1.02rem;font-weight:600;margin-bottom:8px;}
+  .takt-step p{font-size:0.88rem;color:rgba(21,27,30,0.7);margin:0;}
+  .takt-step .tag{
+    display:inline-block;margin-top:12px;font-family:'IBM Plex Mono',monospace;
+    font-size:0.72rem;color:var(--stahlblau);background:rgba(62,110,142,0.1);
+    padding:3px 8px;border-radius:2px;
+  }
+  @media (max-width: 900px){
+    .takt{grid-template-columns:1fr;}
+  }
+
+  /* GENEHMIGUNG TABLE */
+  .country-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:22px;
+  }
+  @media (max-width: 900px){.country-grid{grid-template-columns:1fr;}}
+  .country-card{
+    border:1px solid var(--line);background:var(--beton-2);
+    padding:26px;
+  }
+  .country-card h3{
+    font-size:1.15rem;font-weight:700;margin-bottom:4px;
+  }
+  .country-card .flagband{
+    height:4px;width:36px;margin-bottom:16px;
+  }
+  .flagband.de{background:linear-gradient(90deg,#151B1E 33%,#B8763A 33% 66%,#E7E4DD 66%);}
+  .flagband.at{background:linear-gradient(90deg,#B8322C 33%,#F4F2EC 33% 66%,#B8322C 66%);}
+  .flagband.ch{background:#B8322C;}
+  .country-card dl{margin:16px 0 0;}
+  .country-card dt{
+    font-family:'IBM Plex Mono',monospace;font-size:0.74rem;
+    color:var(--stahlblau);text-transform:uppercase;letter-spacing:0.04em;
+    margin-top:14px;
+  }
+  .country-card dt:first-of-type{margin-top:0;}
+  .country-card dd{margin:5px 0 0;font-size:0.92rem;color:rgba(21,27,30,0.82);}
+  .caveat{
+    margin-top:20px;font-size:0.85rem;color:rgba(21,27,30,0.6);
+    border-left:2px solid var(--kupfer);padding-left:14px;
+  }
+
+  /* KOSTEN/ZEIT */
+  .cost-panel{
+    background:var(--graphit);color:var(--off-white);
+    padding:44px;
+  }
+  .cost-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;}
+  @media (max-width:900px){.cost-grid{grid-template-columns:1fr;}}
+  .kg-row{
+    display:flex;justify-content:space-between;gap:16px;
+    padding:12px 0;border-bottom:1px solid var(--line-dark);
+    font-family:'IBM Plex Mono',monospace;font-size:0.86rem;
+  }
+  .kg-row .label{color:rgba(247,246,242,0.78);}
+  .kg-row .val{color:var(--kupfer-hell);font-weight:600;white-space:nowrap;}
+  .kg-row.total{border-bottom:none;border-top:1px solid var(--line-dark);margin-top:6px;padding-top:16px;}
+  .kg-row.total .val{color:var(--off-white);}
+  .bar-row{margin-bottom:18px;}
+  .bar-row .barlabel{
+    display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;
+    font-size:0.8rem;margin-bottom:6px;color:rgba(247,246,242,0.78);
+  }
+  .bar-track{height:10px;background:rgba(247,246,242,0.12);position:relative;}
+  .bar-fill{height:100%;background:var(--stahlblau-hell);}
+  .bar-fill.buffer{background:repeating-linear-gradient(45deg,var(--kupfer),var(--kupfer) 6px,var(--kupfer-hell) 6px,var(--kupfer-hell) 12px);}
+
+  /* LEAN PRINZIPIEN */
+  .principle-list{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;}
+  @media (max-width:900px){.principle-list{grid-template-columns:1fr;}}
+  .principle{border:1px solid var(--line);padding:24px;background:var(--beton-2);}
+  .principle h3{font-size:1rem;font-weight:600;margin-bottom:8px;}
+  .principle p{font-size:0.92rem;color:rgba(21,27,30,0.72);margin:0;}
+  .principle .mono-tag{
+    display:block;font-family:'IBM Plex Mono',monospace;font-size:0.72rem;
+    color:var(--kupfer);margin-bottom:10px;letter-spacing:0.03em;
+  }
+
+  /* ABWEICHUNGSSTRATEGIE */
+  .strategy-timeline{position:relative;padding-left:28px;border-left:2px solid var(--line);}
+  .strategy-item{position:relative;padding-bottom:32px;}
+  .strategy-item:last-child{padding-bottom:0;}
+  .strategy-item::before{
+    content:"";position:absolute;left:-33px;top:2px;width:10px;height:10px;
+    background:var(--stahlblau);border-radius:50%;
+  }
+  .strategy-item h3{font-size:1rem;font-weight:600;margin-bottom:6px;}
+  .strategy-item p{font-size:0.92rem;color:rgba(21,27,30,0.72);margin:0;max-width:64ch;}
+
+  footer{
+    background:var(--graphit);color:rgba(247,246,242,0.6);
+    padding:40px 0;font-size:0.85rem;
+  }
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+  footer strong{color:var(--off-white);}
+
+  .disclaimer{
+    font-size:0.82rem;color:rgba(21,27,30,0.55);margin-top:28px;
+    max-width:70ch;
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <nav>
+    <div class="logo">
+      <svg class="mark" viewBox="0 0 24 24"><polygon points="12,2 22,9 18,21 6,21 2,9" fill="none" stroke="#D69860" stroke-width="1.4"/><polygon points="12,2 22,9 12,13" fill="#D69860" opacity="0.6"/></svg>
+      FullerHome
+    </div>
+    <ul>
+      <li><a class="navlink" href="#prozess"><span class="num">01</span>Prozess</a></li>
+      <li><a class="navlink" href="#genehmigung"><span class="num">02</span>Genehmigung</a></li>
+      <li><a class="navlink" href="#kosten"><span class="num">03</span>Kosten &amp; Zeit</a></li>
+      <li><a class="navlink" href="#lean"><span class="num">04</span>Lean-Struktur</a></li>
+      <li><a class="navlink" href="#abweichung"><span class="num">05</span>Abweichungen</a></li>
+    </ul>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Robotische Kuppelfertigung — DE · AT · CH</div>
+      <h1>Vom Baufeld zur <em>bezugsfertigen Kuppel</em> — geplant, genehmigt, gebaut.</h1>
+      <p class="lead">FullerHome fertigt geodätische Wohnkuppeln robotisch vor und montiert sie im Takt vor Ort. Das Besondere: Genehmigungsverfahren, Kosten und Termine sind von Anfang an fester Bestandteil der Projektstruktur — nicht ein nachträgliches Risiko.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#genehmigung">Genehmigungsfähigkeit prüfen</a>
+        <a class="btn btn-ghost" href="#prozess">Projektablauf ansehen</a>
+      </div>
+    </div>
+    <div class="dome-wrap">
+      <svg viewBox="0 0 400 340" width="100%">
+        <polygon class="facet" points="200,20 260,60 200,100 140,60" style="animation-delay:.05s"/>
+        <polygon class="facet copper" points="260,60 320,100 260,140 200,100" style="animation-delay:.15s"/>
+        <polygon class="facet" points="140,60 200,100 140,140 80,100" style="animation-delay:.15s"/>
+        <polygon class="facet" points="80,100 140,140 80,180 20,140" style="animation-delay:.25s"/>
+        <polygon class="facet copper" points="140,140 200,180 140,220 80,180" style="animation-delay:.25s"/>
+        <polygon class="facet" points="200,100 260,140 200,180 140,140" style="animation-delay:.3s"/>
+        <polygon class="facet" points="260,140 320,180 260,220 200,180" style="animation-delay:.25s"/>
+        <polygon class="facet copper" points="320,100 380,140 320,180 260,140" style="animation-delay:.15s"/>
+        <polygon class="facet" points="80,180 140,220 80,260 20,220" style="animation-delay:.4s"/>
+        <polygon class="facet" points="140,220 200,260 140,300 80,260" style="animation-delay:.45s"/>
+        <polygon class="facet copper" points="200,180 260,220 200,260 140,220" style="animation-delay:.4s"/>
+        <polygon class="facet" points="260,220 320,260 260,300 200,260" style="animation-delay:.45s"/>
+        <polygon class="facet" points="320,180 380,220 320,260 260,220" style="animation-delay:.4s"/>
+        <line x1="20" y1="260" x2="380" y2="260" stroke="#3E6E8E" stroke-width="1" opacity="0.5"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section id="prozess">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">01 — Projektstruktur</div>
+      <h2>Fünf Takte statt fünf Leistungsphasen</h2>
+      <p>Der Projektablauf folgt Lean-Construction-Prinzipien: kurze, klar abgegrenzte Takte mit definierten Übergabekriterien statt eines starren Phasenmodells. Jeder Takt hat einen Verantwortlichen, ein Ergebnis und einen geprüften Puffer.</p>
+    </div>
+    <div class="takt">
+      <div class="takt-step">
+        <span class="idx">TAKT 01</span>
+        <h3>Standort- &amp; Bedarfsanalyse</h3>
+        <p>Baugrund, Erschließung, Abstandsflächen, Bebauungsplan-Check, erste Grobkosten.</p>
+        <span class="tag">Pull-Trigger: Grundstücksdaten</span>
+      </div>
+      <div class="takt-step">
+        <span class="idx">TAKT 02</span>
+        <h3>Genehmigungsplanung</h3>
+        <p>Bauantrag, Standsicherheitsnachweis, Abstimmung mit unterer Bauaufsicht bzw. Baubehörde.</p>
+        <span class="tag">Kritischer Pfad</span>
+      </div>
+      <div class="takt-step">
+        <span class="idx">TAKT 03</span>
+        <h3>Robotische Vorfertigung</h3>
+        <p>Fertigung der Kuppelsegmente parallel zum laufenden Genehmigungsverfahren.</p>
+        <span class="tag">Parallelisiert</span>
+      </div>
+      <div class="takt-step">
+        <span class="idx">TAKT 04</span>
+        <h3>Taktmontage vor Ort</h3>
+        <p>Segmentweise Montage nach Last-Planner-Wochenplan, Qualitätskontrolle je Takt.</p>
+        <span class="tag">PPC-Messung</span>
+      </div>
+      <div class="takt-step">
+        <span class="idx">TAKT 05</span>
+        <h3>Abnahme &amp; Übergabe</h3>
+        <p>Bauabnahme, Fertigstellungsanzeige, Übergabe inkl. Dokumentation an Eigentümer.</p>
+        <span class="tag">Meilenstein</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="genehmigung" style="background:var(--beton);">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">02 — Genehmigungsfähigkeit</div>
+      <h2>Kuppelbauten sind genehmigungsfähig — aber nicht Standardfall</h2>
+      <p>Die runde, geodätische Form weicht von typisierten Dachformen ab. Das betrifft vor allem Abstandsflächenberechnung, Brandschutznachweis und – je nach Lage – die Einordnung als Sonderbau. Die drei DACH-Länder regeln das unterschiedlich.</p>
+    </div>
+    <div class="country-grid">
+      <div class="country-card">
+        <div class="flagband de"></div>
+        <h3>Deutschland</h3>
+        <dl>
+          <dt>Rechtsgrundlage</dt>
+          <dd>Landesbauordnung (LBO) des jeweiligen Bundeslands, Musterbauordnung als Orientierung.</dd>
+          <dt>Besonderheit Kuppelform</dt>
+          <dd>Abstandsflächen werden bei gekrümmten Dachflächen oft über eine gedachte Ersatz-Traufhöhe ermittelt; das erfordert i.d.R. eine gesonderte Abstimmung mit der Bauaufsicht.</dd>
+          <dt>Verfahrensart</dt>
+          <dd>Meist vereinfachtes Genehmigungsverfahren, bei Sonderbau-Einstufung volles Verfahren mit Beteiligung Brandschutz/Statik-Prüfstelle.</dd>
+          <dt>Typische Dauer</dt>
+          <dd>ca. 3–6 Monate (vereinfacht), 6–10 Monate (volles Verfahren)</dd>
+          <dt>Kostenrahmen</dt>
+          <dd>ca. 0,5–1,0 % der Bauwerkskosten (Gebühren nach Landes-Gebührenordnung)</dd>
+        </dl>
+      </div>
+      <div class="country-card">
+        <div class="flagband at"></div>
+        <h3>Österreich</h3>
+        <dl>
+          <dt>Rechtsgrundlage</dt>
+          <dd>Bauordnung des jeweiligen Bundeslands (z.B. Wien, NÖ, OÖ jeweils eigenständig geregelt).</dd>
+          <dt>Besonderheit Kuppelform</dt>
+          <dd>Runde Grundrisse gelten oft als "Bauwerk besonderer Art" – zusätzliche Gutachten zu Statik und Bauphysik sind häufig gefordert.</dd>
+          <dt>Verfahrensart</dt>
+          <dd>Baubewilligungsverfahren mit Anrainer-Einbindung; Anzeigeverfahren nur bei kleinen Nebengebäuden möglich.</dd>
+          <dt>Typische Dauer</dt>
+          <dd>ca. 4–8 Monate, abhängig von Einsprüchen der Anrainer</dd>
+          <dt>Kostenrahmen</dt>
+          <dd>ca. 0,5–1,2 % der Bauwerkskosten zzgl. Anrainer-/Gutachterkosten</dd>
+        </dl>
+      </div>
+      <div class="country-card">
+        <div class="flagband ch"></div>
+        <h3>Schweiz</h3>
+        <dl>
+          <dt>Rechtsgrundlage</dt>
+          <dd>Kantonales Baugesetz plus kommunales Baureglement; stark föderal geprägt.</dd>
+          <dt>Besonderheit Kuppelform</dt>
+          <dd>Gestaltungsvorschriften der Gemeinde (Ortsbildschutz) sind oft der limitierende Faktor, nicht die Statik — öffentliche Auflage des Baugesuchs mit Einsprachefrist ist Standard.</dd>
+          <dt>Verfahrensart</dt>
+          <dd>Ordentliches Baubewilligungsverfahren mit öffentlicher Auflage (meist 20–30 Tage Einsprachefrist).</dd>
+          <dt>Typische Dauer</dt>
+          <dd>ca. 3–7 Monate, plus Einsprachefrist</dd>
+          <dt>Kostenrahmen</dt>
+          <dd>ca. 0,5–1,5 % der Bausumme, kantonal/kommunal sehr unterschiedlich</dd>
+        </dl>
+      </div>
+    </div>
+    <p class="caveat">Die Angaben sind typisierte Richtwerte für die Projektplanung. Verfahrensart, Fristen und Gebühren hängen konkret vom Bundesland, Kanton bzw. der Gemeinde sowie der Gebäudeklasse ab und werden je Standort verbindlich mit der zuständigen Behörde geklärt.</p>
+  </div>
+</section>
+
+<section id="kosten">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">03 — Kosten- &amp; Zeitintegration</div>
+      <h2>Genehmigung als eigene Kosten- und Terminposition</h2>
+      <p>Genehmigungsgebühren, Gutachten und Pufferzeiten werden nicht in die Bauwerkskosten "versteckt", sondern nach DIN&nbsp;276-Logik als eigene Kostengruppe und im Taktplan als eigener Balken geführt.</p>
+    </div>
+    <div class="cost-panel">
+      <div class="cost-grid">
+        <div>
+          <h3 style="color:var(--off-white);font-size:1rem;margin-bottom:18px;">Kostengliederung (Auszug, in % der Gesamtkosten)</h3>
+          <div class="kg-row"><span class="label">KG 300/400 — Bauwerk (Robotik-Fertigung, Montage)</span><span class="val">72 %</span></div>
+          <div class="kg-row"><span class="label">KG 500 — Außenanlagen / Erschließung</span><span class="val">8 %</span></div>
+          <div class="kg-row"><span class="label">KG 700.1 — Genehmigungsgebühren &amp; Gutachten</span><span class="val">1,5 %</span></div>
+          <div class="kg-row"><span class="label">KG 700.2 — Planung, Statik, Bauphysik</span><span class="val">9,5 %</span></div>
+          <div class="kg-row"><span class="label">Risikopuffer (Genehmigung &amp; Nachträge)</span><span class="val">6 %</span></div>
+          <div class="kg-row total"><span class="label">Gesamtkosten</span><span class="val">100 %</span></div>
+        </div>
+        <div>
+          <h3 style="color:var(--off-white);font-size:1rem;margin-bottom:18px;">Taktplan mit ausgewiesenem Genehmigungspuffer</h3>
+          <div class="bar-row">
+            <div class="barlabel"><span>Standort- &amp; Bedarfsanalyse</span><span>3 Wo.</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:15%;"></div></div>
+          </div>
+          <div class="bar-row">
+            <div class="barlabel"><span>Genehmigungsverfahren</span><span>16–24 Wo.</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:55%;"></div><div class="bar-fill buffer" style="width:15%;position:absolute;top:0;right:0;"></div></div>
+          </div>
+          <div class="bar-row">
+            <div class="barlabel"><span>Robotische Vorfertigung (parallel)</span><span>10 Wo.</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:38%;"></div></div>
+          </div>
+          <div class="bar-row">
+            <div class="barlabel"><span>Taktmontage vor Ort</span><span>4 Wo.</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:18%;"></div></div>
+          </div>
+          <p style="font-size:0.78rem;color:rgba(247,246,242,0.55);margin-top:8px;">Schraffierter Abschnitt = eingeplanter Genehmigungspuffer (Rückfragen, Nachforderungen der Behörde).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="lean" style="background:var(--beton);">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">04 — Lean-Struktur</div>
+      <h2>Lean Construction als Ordnungsprinzip fürs Gesamtprojekt</h2>
+      <p>Statt eines linearen Wasserfalls organisiert FullerHome das Projekt über Last-Planner-Prinzipien: Pull-Planung vom Übergabetermin rückwärts, kurze Taktzyklen, sichtbare Puffer statt versteckter Sicherheiten.</p>
+    </div>
+    <div class="principle-list">
+      <div class="principle">
+        <span class="mono-tag">PULL-PRINZIP</span>
+        <h3>Rückwärtsterminierung ab Übergabe</h3>
+        <p>Der Ablauf wird vom gewünschten Bezugstermin rückwärts geplant. Das Genehmigungsverfahren wird so früh angestoßen, dass es nicht zum Engpass wird.</p>
+      </div>
+      <div class="principle">
+        <span class="mono-tag">LAST PLANNER SYSTEM</span>
+        <h3>Wochenplanung mit PPC-Kennzahl</h3>
+        <p>Jeder Takt wird wöchentlich freigegeben; die Kennzahl "Percent Plan Complete" macht Abweichungen sofort sichtbar, statt sie erst am Projektende zu bemerken.</p>
+      </div>
+      <div class="principle">
+        <span class="mono-tag">PUFFERMANAGEMENT</span>
+        <h3>Sichtbare statt versteckte Puffer</h3>
+        <p>Puffer für Genehmigung, Wetter und Lieferketten werden als eigene, benannte Blöcke geführt — nicht in einzelne Vorgänge "eingepreist".</p>
+      </div>
+      <div class="principle">
+        <span class="mono-tag">TAKTPLANUNG</span>
+        <h3>Gleichmäßiger Bautakt am Standort</h3>
+        <p>Die Vor-Ort-Montage folgt festen Taktzeiten je Kuppelsegment, wodurch Ressourcen (Kran, Robotik-Einheit, Montageteam) exakt ausgelastet werden.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="abweichung">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">05 — Umgang mit Abweichungen</div>
+      <h2>Ein guter Umgang mit Budget- und Terminüberschreitungen heißt: früh sichtbar, nicht spät entschuldigt</h2>
+      <p>Überschreitungen lassen sich selten vollständig vermeiden, insbesondere bei behördlichen Verfahren mit Fremdeinfluss. Entscheidend ist ein Prozess, der Abweichungen früh erkennt und transparent behandelt.</p>
+    </div>
+    <div class="strategy-timeline">
+      <div class="strategy-item">
+        <h3>1. Risikopuffer statt Nachkalkulation</h3>
+        <p>Genehmigungs- und Nachtragspuffer sind von Beginn an eingepreist (siehe Kostengliederung) und werden nicht erst bei Eintritt eines Problems "gefunden".</p>
+      </div>
+      <div class="strategy-item">
+        <h3>2. Frühwarnsystem über PPC und Meilenstein-Ampel</h3>
+        <p>Verzögerungen im Genehmigungsverfahren oder in der Fertigung werden wöchentlich über die PPC-Kennzahl erkannt — nicht erst am geplanten Fertigstellungstermin.</p>
+      </div>
+      <div class="strategy-item">
+        <h3>3. Strukturiertes Nachtragsmanagement</h3>
+        <p>Mehrkosten aus behördlichen Auflagen oder Planänderungen werden als dokumentierte Nachträge mit Ursache, Kosten- und Terminfolge ausgewiesen — nachvollziehbar für Bauherr und Behörde.</p>
+      </div>
+      <div class="strategy-item">
+        <h3>4. Meilensteinbasierte Zahlungen</h3>
+        <p>Zahlungen sind an geprüfte Meilensteine gekoppelt (z.B. Genehmigungserteilung, Rohbauabschluss), wodurch Bauherr und Anbieter das gleiche Interesse an realistischer Terminierung haben.</p>
+      </div>
+      <div class="strategy-item">
+        <h3>5. Frühzeitige Behördeneinbindung</h3>
+        <p>Vorgespräche mit der zuständigen Bauaufsicht/-behörde vor Einreichung reduzieren das Risiko von Rückfragen und damit die häufigste Ursache für Terminüberschreitungen bei Kuppelbauten.</p>
+      </div>
+    </div>
+    <p class="disclaimer">Hinweis: Die genannten Fristen, Kostensätze und Verfahrensangaben sind projektbezogene Planungsannahmen und ersetzen keine rechtliche oder bauordnungsrechtliche Beratung im Einzelfall.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div><strong>FullerHome</strong> — Robotische Kuppelbauten für DACH</div>
+    <div class="mono">Genehmigung · Fertigung · Montage</div>
+  </div>
+</footer>
+
+</body>
+</html>
