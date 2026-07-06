@@ -1,0 +1,110 @@
+.wrap {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 22px;
+  margin: 20px 0;
+}
+
+.col {
+  min-width: 0;
+}
+
+.colHead {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.colSub {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-muted);
+  margin-bottom: 14px;
+}
+
+.kgRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 1rem;
+}
+
+.kgLabel {
+  color: var(--color-blueberry);
+}
+
+.kgVal {
+  font-family: var(--font-mono);
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.kgTotal {
+  border-bottom: none;
+  border-top: 2px solid var(--color-hazelnut);
+  font-weight: 700;
+}
+
+.note {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--color-muted);
+  margin-top: 12px;
+}
+
+.barRow {
+  margin-bottom: 14px;
+}
+
+.barLabel {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: var(--color-blueberry);
+  margin-bottom: 5px;
+}
+
+.barRange {
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.barTrack {
+  position: relative;
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(31, 25, 52, 0.08);
+  overflow: hidden;
+}
+
+.barFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--color-blueberry);
+}
+
+.barBuffer {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--color-lemon),
+    var(--color-lemon) 5px,
+    var(--color-blueberry) 5px,
+    var(--color-blueberry) 10px
+  );
+}

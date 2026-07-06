@@ -3,8 +3,11 @@
 import dynamic from "next/dynamic";
 import BuildHUD from "@/components/ui/BuildHUD";
 import Datasheet from "@/components/ui/Datasheet";
+import DeliverySection from "@/components/ui/DeliverySection";
 import Hero from "@/components/ui/Hero";
+import PermitsSection from "@/components/ui/PermitsSection";
 import ProcurementSection from "@/components/ui/ProcurementSection";
+import SiteNav from "@/components/ui/SiteNav";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import styles from "./page.module.css";
 
@@ -12,12 +15,13 @@ const Scene3D = dynamic(() => import("@/components/scene/Scene3D"), { ssr: false
 
 export default function HomePage() {
   return (
-    <main className={styles.main}>
+    <main id="top" className={styles.main}>
+      <SiteNav />
       <Hero />
 
       <div className={styles.pageWrap}>
       {/* --- Split: controls left, 3D right (configure + build) --- */}
-      <div className={styles.split}>
+      <div id="sim" className={styles.split}>
         <aside className={styles.leftCol}>
           <BuildHUD />
         </aside>
@@ -38,6 +42,10 @@ export default function HomePage() {
       </div>
 
       <ProcurementSection />
+
+      <PermitsSection />
+
+      <DeliverySection />
 
       {/* --- Info --- */}
       <section id="info" className={styles.infoSection}>

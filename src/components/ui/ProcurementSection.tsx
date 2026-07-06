@@ -51,7 +51,7 @@ export default function ProcurementSection() {
   const activeIndex = VERGABE_BANDS.findIndex((b) => b.id === result.band.id);
 
   return (
-    <section className={styles.section}>
+    <section id="procurement" className={styles.section}>
       <div className={styles.inner}>
         <div className={styles.headRow}>
           <div>

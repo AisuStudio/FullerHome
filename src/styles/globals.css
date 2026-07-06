@@ -34,6 +34,17 @@ html, body {
   font-family: var(--font-sans);
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* keep anchored sections clear of the sticky nav */
+[id] {
+  scroll-margin-top: 56px;
+}
+
 #scene-canvas {
   position: absolute;
   inset: 0;

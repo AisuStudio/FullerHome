@@ -1,0 +1,87 @@
+.section {
+  background: var(--color-vanilla);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.inner {
+  padding: 24px 28px 32px;
+}
+
+.heading {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-top: 40px;
+  margin-bottom: 8px;
+}
+
+.intro {
+  max-width: 640px;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-blueberry);
+  margin-bottom: 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 20px 22px;
+}
+
+.flagband {
+  height: 4px;
+  width: 36px;
+  border-radius: 2px;
+  margin-bottom: 14px;
+}
+
+.card h3 {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.card dl {
+  margin: 12px 0 0;
+}
+
+.card dt {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-muted);
+  margin-top: 14px;
+}
+
+.card div:first-of-type dt {
+  margin-top: 0;
+}
+
+.card dd {
+  margin: 5px 0 0;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--color-blueberry);
+}
+
+.caveat {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--color-muted);
+  border-left: 3px solid var(--color-accent);
+  padding-left: 14px;
+  max-width: 70ch;
+}
