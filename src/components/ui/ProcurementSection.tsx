@@ -7,6 +7,9 @@ import { deriveVergabe } from "@/lib/vergabe/derive";
 import { Bundesland, VergabeBand } from "@/lib/vergabe/types";
 import { TYPE_BUDGET } from "@/lib/shell/generate";
 import { HouseType } from "@/lib/shell/types";
+import { Locale } from "@/lib/i18n/locale";
+import { withLocale } from "@/lib/i18n/paths";
+import { HOUSE_TYPE_LABELS } from "@/lib/i18n/houseTypes";
 import styles from "./ProcurementSection.module.css";
 
 const euro = (n: number) => "€" + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
@@ -16,14 +19,79 @@ const LAND_LABELS: { key: Bundesland; label: string }[] = [
   { key: "brandenburg", label: "Brandenburg" },
 ];
 
-const TYPE_LABELS: Record<HouseType, string> = {
-  shelter: "Vehicle Shelter",
-  office: "Tourism Office",
-  library: "Library",
-};
-
 // inverse of grossBudgetToNetConstructionValue (net = gross/1.19*0.92)
 const NET_TO_GROSS = 1.19 / 0.92;
+
+const STRINGS: Record<
+  Locale,
+  {
+    heading: string;
+    intro1: string;
+    introChangeLink: string;
+    state: string;
+    above: string;
+    upTo: string;
+    statutoryReference: string;
+    indicativeDuration: string;
+    netConstructionValue: string;
+    additionalObligations: string;
+    timelineNote1: string;
+    timelineNote2: string;
+    disclaimer: string;
+    creditPrefix: string;
+  }
+> = {
+  en: {
+    heading: "Procurement Simulation",
+    intro1:
+      "If this building were publicly commissioned, its budget would determine " +
+      "which award procedure (Vergabeverfahren) German procurement law requires. " +
+      "Configured building:",
+    introChangeLink: "change it in the simulation",
+    state: "State (Land)",
+    above: "above",
+    upTo: "≤",
+    statutoryReference: "Statutory reference",
+    indicativeDuration: "Indicative duration",
+    netConstructionValue: "Net construction value",
+    additionalObligations: "additional",
+    timelineNote1: "This procedure runs ",
+    timelineNote2:
+      " construction can start — its duration adds to, not overlaps with, the build schedule (see",
+    disclaimer:
+      "Indicative, educational simulation — not legal advice. Thresholds as of " +
+      "July 2026 (Vergabebeschleunigungsgesetz, EU works threshold 2026/2027). " +
+      "Net construction value approximated from the gross budget above (÷1.19 VAT, " +
+      "8% planning share removed); real net-value assessment follows VgV/VOB/A " +
+      "contract-splitting rules.",
+    creditPrefix: "Procurement simulation developed in collaboration with",
+  },
+  de: {
+    heading: "Vergabe-Simulation",
+    intro1:
+      "Wäre dieses Gebäude öffentlich beauftragt, würde sein Budget bestimmen, " +
+      "welches Vergabeverfahren das deutsche Vergaberecht vorschreibt. " +
+      "Konfiguriertes Gebäude:",
+    introChangeLink: "in der Simulation ändern",
+    state: "Bundesland",
+    above: "darüber",
+    upTo: "≤",
+    statutoryReference: "Rechtsgrundlage",
+    indicativeDuration: "Indikative Dauer",
+    netConstructionValue: "Netto-Bauwert",
+    additionalObligations: "zusätzliche",
+    timelineNote1: "Dieses Verfahren läuft ",
+    timelineNote2:
+      " der Bau beginnen kann — seine Dauer kommt zum Bauzeitplan hinzu, statt sich mit ihm zu überschneiden (siehe",
+    disclaimer:
+      "Indikative, edukative Simulation — keine Rechtsberatung. Schwellenwerte " +
+      "Stand Juli 2026 (Vergabebeschleunigungsgesetz, EU-Bauschwellenwert " +
+      "2026/2027). Der Netto-Bauwert wird aus dem obigen Bruttobudget angenähert " +
+      "(÷1,19 USt., 8% Planungsanteil abgezogen); die reale Netto-Wert-Bewertung " +
+      "folgt den VgV/VOB/A-Losaufteilungsregeln.",
+    creditPrefix: "Vergabe-Simulation entwickelt in Zusammenarbeit mit",
+  },
+};
 
 /** The gross budget that best targets this band, clamped to the typology's
  * own realistic range. Always clickable — for typologies whose budget range
@@ -47,12 +115,13 @@ function grossBudgetForBand(
  * store (no duplicate controls) and shows which Vergabeverfahren the
  * configured building would trigger under German procurement law.
  */
-export default function ProcurementSection() {
+export default function ProcurementSection({ locale }: { locale: Locale }) {
   const budget = useSimStore((s) => s.budget);
   const bundesland = useSimStore((s) => s.bundesland);
   const houseType = useSimStore((s) => s.houseType);
   const setBundesland = useSimStore((s) => s.setBundesland);
   const setBudget = useSimStore((s) => s.setBudget);
+  const t = STRINGS[locale];
 
   const result = deriveVergabe(budget, bundesland);
   const activeIndex = VERGABE_BANDS.findIndex((b) => b.id === result.band.id);
@@ -62,20 +131,18 @@ export default function ProcurementSection() {
       <div className={styles.inner}>
         <div className={styles.headRow}>
           <div>
-            <h2 className={styles.heading}>Procurement Simulation</h2>
+            <h2 className={styles.heading}>{t.heading}</h2>
             <p className={styles.intro}>
-              If this building were publicly commissioned, its budget would determine
-              which award procedure (<em>Vergabeverfahren</em>) German procurement law
-              requires. Configured building:{" "}
+              {t.intro1}{" "}
               <strong>
-                {TYPE_LABELS[houseType]}, {euro(budget)}
+                {HOUSE_TYPE_LABELS[locale][houseType].label}, {euro(budget)}
               </strong>{" "}
-              — <Link href="/">change it in the simulation</Link>.
+              — <Link href={withLocale(locale, "/")}>{t.introChangeLink}</Link>.
             </p>
           </div>
 
           <div className={styles.landToggle}>
-            <span className={styles.landLabel}>State (Land)</span>
+            <span className={styles.landLabel}>{t.state}</span>
             <div className={styles.landBtns}>
               {LAND_LABELS.map((l) => (
                 <button
@@ -99,14 +166,14 @@ export default function ProcurementSection() {
               <button
                 key={b.id}
                 type="button"
-                title={`Set budget to ${euro(jumpTo)}`}
+                title={`${locale === "de" ? "Budget setzen auf" : "Set budget to"} ${euro(jumpTo)}`}
                 onClick={() => setBudget(jumpTo)}
                 className={`${styles.pill} ${i === activeIndex ? styles.pillActive : ""} ${i < activeIndex ? styles.pillPassed : ""}`}
               >
                 <span className={styles.pillName}>{b.nameDe}</span>
-                <span className={styles.pillGloss}>{b.nameEn}</span>
+                {locale === "en" && <span className={styles.pillGloss}>{b.nameEn}</span>}
                 <span className={styles.pillCap}>
-                  {b.upToNet === Infinity ? "above" : `≤ ${euro(b.upToNet)}`}
+                  {b.upToNet === Infinity ? t.above : `${t.upTo} ${euro(b.upToNet)}`}
                 </span>
               </button>
             );
@@ -117,30 +184,32 @@ export default function ProcurementSection() {
         <div className={styles.detailCard}>
           <div className={styles.detailHead}>
             <span className={styles.detailTerm}>{result.band.nameDe}</span>
-            <span className={styles.detailGloss}>— {result.band.nameEn}</span>
+            {locale === "en" && <span className={styles.detailGloss}>— {result.band.nameEn}</span>}
           </div>
-          <p className={styles.detailExplanation}>{result.band.explanation}</p>
+          <p className={styles.detailExplanation}>{result.band.explanation[locale]}</p>
           <div className={styles.detailMeta}>
             <div>
-              <span>Statutory reference</span>
-              <strong>{result.band.reference}</strong>
+              <span>{t.statutoryReference}</span>
+              <strong>{result.band.reference[locale]}</strong>
             </div>
             <div>
-              <span>Indicative duration</span>
-              <strong>{result.band.durationRange}</strong>
+              <span>{t.indicativeDuration}</span>
+              <strong>{result.band.durationRange[locale]}</strong>
             </div>
             <div>
-              <span>Net construction value</span>
+              <span>{t.netConstructionValue}</span>
               <strong>{euro(result.budgetNet)}</strong>
             </div>
           </div>
 
           <div className={styles.obligations}>
             <span className={styles.obligationsTitle}>
-              {result.landObligation.actName} — additional {LAND_LABELS.find((l) => l.key === bundesland)?.label} obligations
+              {result.landObligation.actName} — {t.additionalObligations}{" "}
+              {LAND_LABELS.find((l) => l.key === bundesland)?.label}{" "}
+              {locale === "de" ? "Pflichten" : "obligations"}
             </span>
             <ul>
-              {result.landObligation.points.map((p) => (
+              {result.landObligation.points[locale].map((p) => (
                 <li key={p}>{p}</li>
               ))}
             </ul>
@@ -148,21 +217,16 @@ export default function ProcurementSection() {
         </div>
 
         <p className={styles.timelineNote}>
-          This procedure runs <strong>before</strong> construction can start — its
-          duration adds to, not overlaps with, the build schedule (see{" "}
-          <Link href="/about">About</Link>).
+          {t.timelineNote1}
+          <strong>{locale === "de" ? "vor" : "before"}</strong>
+          {t.timelineNote2}{" "}
+          <Link href={withLocale(locale, "/about")}>{locale === "de" ? "Über" : "About"}</Link>).
         </p>
 
-        <p className={styles.disclaimer}>
-          Indicative, educational simulation — not legal advice. Thresholds as of
-          July&nbsp;2026 (Vergabebeschleunigungsgesetz, EU works threshold 2026/2027).
-          Net construction value approximated from the gross budget above (÷1.19 VAT,
-          8% planning share removed); real net-value assessment follows VgV/VOB/A
-          contract-splitting rules.
-        </p>
+        <p className={styles.disclaimer}>{t.disclaimer}</p>
 
         <p className={styles.credit}>
-          Procurement simulation developed in collaboration with{" "}
+          {t.creditPrefix}{" "}
           <a href="https://meilestn.de/" target="_blank" rel="noopener noreferrer">
             <strong>Meile + Stein</strong>
           </a>

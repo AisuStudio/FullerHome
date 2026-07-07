@@ -3,10 +3,90 @@
 import { useSimStore } from "@/lib/store";
 import { TYPE_BUDGET, buildingDims } from "@/lib/shell/generate";
 import { HouseType } from "@/lib/shell/types";
-import { HOUSE_TYPES } from "./BuildHUD";
+import { Locale } from "@/lib/i18n/locale";
+import { houseTypesList } from "@/lib/i18n/houseTypes";
 import styles from "./ConfigPanel.module.css";
 
 const euro = (n: number) => "€" + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
+
+const STRINGS: Record<
+  Locale,
+  {
+    commissioningBody: string;
+    budget: string;
+    floorArea: string;
+    footprint: string;
+    height: string;
+    plates: string;
+    shellRobot: string;
+    fitOut: string;
+    timberShell: string;
+    glazing: string;
+    foundation: string;
+    interiorFitOut: string;
+    utilities: string;
+    robot: string;
+    planning: string;
+    total: string;
+    note: string;
+    day: string;
+    days: string;
+    wks: string;
+  }
+> = {
+  en: {
+    commissioningBody: "Commissioning body:",
+    budget: "Budget",
+    floorArea: "Floor area",
+    footprint: "Footprint",
+    height: "Height",
+    plates: "Plates",
+    shellRobot: "Shell (robot)",
+    fitOut: "Fit-out",
+    timberShell: "Timber shell",
+    glazing: "Glazing",
+    foundation: "Foundation",
+    interiorFitOut: "Interior fit-out",
+    utilities: "Utilities",
+    robot: "Robot",
+    planning: "Planning 8%",
+    total: "Total",
+    note:
+      "Fixed footprint per typology; budget buys build quality — plate resolution, " +
+      "glazing share, and shell/foundation/fit-out spec level. Rough 2026 estimates " +
+      "for illustration, not quotes (cf. BKI construction cost data); planning & " +
+      "permits at 8% of construction cost.",
+    day: "day",
+    days: "days",
+    wks: "wks",
+  },
+  de: {
+    commissioningBody: "Auftraggeber:",
+    budget: "Budget",
+    floorArea: "Nutzfläche",
+    footprint: "Grundriss",
+    height: "Höhe",
+    plates: "Platten",
+    shellRobot: "Schale (Roboter)",
+    fitOut: "Innenausbau",
+    timberShell: "Holzschale",
+    glazing: "Verglasung",
+    foundation: "Fundament",
+    interiorFitOut: "Innenausbau",
+    utilities: "Erschließung",
+    robot: "Roboter",
+    planning: "Planung 8%",
+    total: "Gesamt",
+    note:
+      "Fester Grundriss je Typologie; das Budget kauft Baustandard — Plattenauflösung, " +
+      "Verglasungsanteil und Ausstattungsniveau von Schale/Fundament/Innenausbau. Grobe " +
+      "Schätzungen für 2026 zur Veranschaulichung, keine Angebote (vgl. BKI-Baukostendaten); " +
+      "Planung & Genehmigungen mit 8% der Baukosten.",
+    day: "Tag",
+    days: "Tage",
+    wks: "Wo.",
+  },
+};
 
 function TypePreview({ type }: { type: HouseType }) {
   const wood = "#B08D57";
@@ -46,40 +126,42 @@ function TypePreview({ type }: { type: HouseType }) {
 }
 
 /** Configuration bar shown ABOVE the 3D view during planning — never covers the scene */
-export default function ConfigPanel() {
+export default function ConfigPanel({ locale }: { locale: Locale }) {
   const steps = useSimStore((s) => s.steps);
   const costs = useSimStore((s) => s.costs);
   const budget = useSimStore((s) => s.budget);
   const houseType = useSimStore((s) => s.houseType);
   const design = useSimStore((s) => s.design);
   const { setBudget, setHouseType } = useSimStore();
-  const activeType = HOUSE_TYPES.find((t) => t.key === houseType)!;
+  const houseTypes = houseTypesList(locale);
+  const activeType = houseTypes.find((t) => t.key === houseType)!;
   const range = TYPE_BUDGET[houseType];
   const dims = buildingDims(design);
+  const t = STRINGS[locale];
 
   return (
     <div className={styles.config}>
       <div className={styles.typeRow}>
-        {HOUSE_TYPES.map((t) => (
+        {houseTypes.map((ht) => (
           <button
-            key={t.key}
-            className={`${styles.typeBtn} ${houseType === t.key ? styles.typeActive : ""}`}
-            onClick={() => setHouseType(t.key)}
+            key={ht.key}
+            className={`${styles.typeBtn} ${houseType === ht.key ? styles.typeActive : ""}`}
+            onClick={() => setHouseType(ht.key)}
           >
-            <TypePreview type={t.key} />
-            <strong>{t.label}</strong>
-            <span>{t.desc}</span>
+            <TypePreview type={ht.key} />
+            <strong>{ht.label}</strong>
+            <span>{ht.desc}</span>
           </button>
         ))}
       </div>
 
       <p className={styles.clientLine}>
-        Commissioning body: <strong>{activeType.client}</strong>
+        {t.commissioningBody} <strong>{activeType.client}</strong>
       </p>
 
       <div className={styles.budgetCol}>
         <div className={styles.budgetHeader}>
-          <span className={styles.budgetLabel}>Budget</span>
+          <span className={styles.budgetLabel}>{t.budget}</span>
           <strong className={styles.budgetValue}>{euro(budget)}</strong>
         </div>
         <input
@@ -90,7 +172,7 @@ export default function ConfigPanel() {
           step={range.step}
           value={budget}
           onChange={(e) => setBudget(Number(e.target.value))}
-          aria-label="Budget"
+          aria-label={t.budget}
         />
         <div className={styles.rangeLabels}>
           <span>{euro(range.min)}</span>
@@ -99,31 +181,26 @@ export default function ConfigPanel() {
       </div>
 
         <div className={styles.statsGrid}>
-          <div className={styles.stat}><span>Floor area</span><strong>{costs.floorAreaM2} m²</strong></div>
-          <div className={styles.stat}><span>Footprint</span><strong>{dims.widthM} × {dims.lengthM} m</strong></div>
-          <div className={styles.stat}><span>Height</span><strong>{dims.heightM} m</strong></div>
-          <div className={styles.stat}><span>Plates</span><strong>{steps.length}</strong></div>
-          <div className={styles.stat}><span>Shell (robot)</span><strong>~{costs.shellDays} day{costs.shellDays > 1 ? "s" : ""}</strong></div>
-          <div className={styles.stat}><span>Fit-out</span><strong>~{costs.fitoutWeeks} wks</strong></div>
-          <div className={styles.stat}><span>Timber shell</span><strong>{euro(costs.wood)}</strong></div>
-          <div className={styles.stat}><span>Glazing</span><strong>{euro(costs.glass)}</strong></div>
-          <div className={styles.stat}><span>Foundation</span><strong>{euro(costs.foundation)}</strong></div>
-          <div className={styles.stat}><span>Interior fit-out</span><strong>{euro(costs.fitout)}</strong></div>
-          <div className={styles.stat}><span>Utilities</span><strong>{euro(costs.utilities)}</strong></div>
-          <div className={styles.stat}><span>Robot</span><strong>{euro(costs.robot)}</strong></div>
-          <div className={styles.stat}><span>Planning 8%</span><strong>{euro(costs.planning)}</strong></div>
+          <div className={styles.stat}><span>{t.floorArea}</span><strong>{costs.floorAreaM2} m²</strong></div>
+          <div className={styles.stat}><span>{t.footprint}</span><strong>{dims.widthM} × {dims.lengthM} m</strong></div>
+          <div className={styles.stat}><span>{t.height}</span><strong>{dims.heightM} m</strong></div>
+          <div className={styles.stat}><span>{t.plates}</span><strong>{steps.length}</strong></div>
+          <div className={styles.stat}><span>{t.shellRobot}</span><strong>~{costs.shellDays} {costs.shellDays > 1 ? t.days : t.day}</strong></div>
+          <div className={styles.stat}><span>{t.fitOut}</span><strong>~{costs.fitoutWeeks} {t.wks}</strong></div>
+          <div className={styles.stat}><span>{t.timberShell}</span><strong>{euro(costs.wood)}</strong></div>
+          <div className={styles.stat}><span>{t.glazing}</span><strong>{euro(costs.glass)}</strong></div>
+          <div className={styles.stat}><span>{t.foundation}</span><strong>{euro(costs.foundation)}</strong></div>
+          <div className={styles.stat}><span>{t.interiorFitOut}</span><strong>{euro(costs.fitout)}</strong></div>
+          <div className={styles.stat}><span>{t.utilities}</span><strong>{euro(costs.utilities)}</strong></div>
+          <div className={styles.stat}><span>{t.robot}</span><strong>{euro(costs.robot)}</strong></div>
+          <div className={styles.stat}><span>{t.planning}</span><strong>{euro(costs.planning)}</strong></div>
           <div className={`${styles.stat} ${styles.statTotal}`}>
-            <span>Total</span>
+            <span>{t.total}</span>
             <strong className={costs.total > budget ? styles.overBudget : ""}>{euro(costs.total)}</strong>
           </div>
         </div>
 
-      <p className={styles.note}>
-        Fixed footprint per typology; budget buys build quality — plate resolution,
-        glazing share, and shell/foundation/fit-out spec level. Rough 2026 estimates
-        for illustration, not quotes (cf. BKI construction cost data); planning &amp;
-        permits at 8% of construction cost.
-      </p>
+      <p className={styles.note}>{t.note}</p>
     </div>
   );
 }

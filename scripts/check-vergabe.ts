@@ -43,8 +43,11 @@ check(
 );
 check("last band is unbounded", VERGABE_BANDS[VERGABE_BANDS.length - 1].upToNet === Infinity);
 for (const b of VERGABE_BANDS) {
-  check(`band ${b.id} has a reference`, b.reference.length > 0);
-  check(`band ${b.id} has a duration range`, b.durationRange.length > 0);
+  for (const locale of ["en", "de"] as const) {
+    check(`band ${b.id} has a ${locale} reference`, b.reference[locale].length > 0);
+    check(`band ${b.id} has a ${locale} duration range`, b.durationRange[locale].length > 0);
+    check(`band ${b.id} has a ${locale} explanation`, b.explanation[locale].length > 0);
+  }
 }
 
 // --- gross -> net conversion ---
@@ -60,10 +63,13 @@ for (const land of ["berlin", "brandenburg"] as const) {
   for (const gross of [40_000, 300_000, 3_000_000, 8_000_000]) {
     const result = deriveVergabe(gross, land);
     console.log(
-      `  ${land} gross=${gross} -> net=${result.budgetNet} band=${result.band.id} obligations=${result.landObligation.points.length}`
+      `  ${land} gross=${gross} -> net=${result.budgetNet} band=${result.band.id} obligations=${result.landObligation.points.en.length}`
     );
     check(`${land}/${gross}: obligation act name set`, result.landObligation.actName.length > 0);
-    check(`${land}/${gross}: 2-4 obligation points`, result.landObligation.points.length >= 2 && result.landObligation.points.length <= 4);
+    for (const locale of ["en", "de"] as const) {
+      const points = result.landObligation.points[locale];
+      check(`${land}/${gross}: 2-4 ${locale} obligation points`, points.length >= 2 && points.length <= 4);
+    }
     check(`${land}/${gross}: band matches direct lookup`, result.band.id === bandForNetBudget(result.budgetNet).id);
   }
 }

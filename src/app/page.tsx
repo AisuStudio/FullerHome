@@ -1,38 +1,27 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import Link from "next/link";
-import BuildHUD from "@/components/ui/BuildHUD";
-import Hero from "@/components/ui/Hero";
-import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
-import styles from "./page.module.css";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-const Scene3D = dynamic(() => import("@/components/scene/Scene3D"), { ssr: false });
+/** Bare "/" isn't a real page — every route lives under /en or /de. Static
+ *  export can't do a server redirect, so: detect browser language client-
+ *  side and replace immediately, with a <meta refresh> fallback (hoisted to
+ *  <head> automatically) plus visible links for no-JS / very first paint. */
+export default function RootRedirect() {
+  const router = useRouter();
 
-export default function HomePage() {
+  useEffect(() => {
+    const preferred = navigator.language?.toLowerCase().startsWith("de") ? "de" : "en";
+    router.replace(`/${preferred}`);
+  }, [router]);
+
   return (
-    <main className={styles.main}>
-      <Hero />
-
-      <div className={styles.pageWrap}>
-        {/* --- Split: controls left, 3D right (configure + build) --- */}
-        <div id="sim" className={styles.split}>
-          <aside className={styles.leftCol}>
-            <BuildHUD />
-          </aside>
-
-          <section className={styles.simSection}>
-            <ErrorBoundary>
-              <Scene3D />
-            </ErrorBoundary>
-          </section>
-        </div>
-
-        <p className={styles.nextHint}>
-          Your configuration carries over:{" "}
-          <Link href="/procurement">see which award procedure it would trigger →</Link>
-        </p>
-      </div>
-    </main>
+    <>
+      <meta httpEquiv="refresh" content="1; url=en/" />
+      <p style={{ padding: "2rem", fontFamily: "sans-serif" }}>
+        Redirecting… <a href="en/">Continue in English</a> ·{" "}
+        <a href="de/">Weiter auf Deutsch</a>
+      </p>
+    </>
   );
 }

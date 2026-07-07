@@ -1,31 +1,72 @@
 "use client";
 
 import { useSimStore } from "@/lib/store";
-import { HouseType } from "@/lib/shell/types";
+import { Locale } from "@/lib/i18n/locale";
+import { HOUSE_TYPE_LABELS } from "@/lib/i18n/houseTypes";
 import ConfigPanel from "./ConfigPanel";
 import styles from "./BuildHUD.module.css";
 
-const PHASE_LABELS: { key: string; label: string }[] = [
-  { key: "planning", label: "Planning" },
-  { key: "delivery", label: "Delivery" },
-  { key: "building", label: "Construction" },
-  { key: "done", label: "Complete" },
-];
+const PHASE_LABELS: Record<Locale, { key: string; label: string }[]> = {
+  en: [
+    { key: "planning", label: "Planning" },
+    { key: "delivery", label: "Delivery" },
+    { key: "building", label: "Construction" },
+    { key: "done", label: "Complete" },
+  ],
+  de: [
+    { key: "planning", label: "Planung" },
+    { key: "delivery", label: "Anlieferung" },
+    { key: "building", label: "Bau" },
+    { key: "done", label: "Fertig" },
+  ],
+};
 
-export const HOUSE_TYPES: {
-  key: HouseType;
-  label: string;
-  desc: string;
-  /** who commissions this typology, in the simulation's framing */
-  client: string;
-}[] = [
-  { key: "shelter", label: "Vehicle Shelter", desc: "Geodesic carport, on stilts", client: "District parks department (Bauhof)" },
-  { key: "office", label: "Tourism Office", desc: "Glazed street front", client: "Municipality / tourism board" },
-  { key: "library", label: "Library", desc: "Two-level branch library", client: "Municipality (branch library)" },
-];
+const STRINGS: Record<
+  Locale,
+  {
+    houseType: string;
+    plates: string;
+    woodGlass: string;
+    weight: string;
+    rings: string;
+    realBuildTime: string;
+    deliverMaterial: string;
+    startConstruction: string;
+    pause: string;
+    resume: string;
+    buildAgain: string;
+  }
+> = {
+  en: {
+    houseType: "House type",
+    plates: "Plates",
+    woodGlass: "Wood / glass",
+    weight: "Weight",
+    rings: "Rings",
+    realBuildTime: "Real build time",
+    deliverMaterial: "Deliver material",
+    startConstruction: "▶ Start construction",
+    pause: "❚❚ Pause",
+    resume: "▶ Resume",
+    buildAgain: "↺ Build again",
+  },
+  de: {
+    houseType: "Gebäudetyp",
+    plates: "Platten",
+    woodGlass: "Holz / Glas",
+    weight: "Gewicht",
+    rings: "Ringe",
+    realBuildTime: "Reale Bauzeit",
+    deliverMaterial: "Material anliefern",
+    startConstruction: "▶ Bau starten",
+    pause: "❚❚ Pause",
+    resume: "▶ Fortsetzen",
+    buildAgain: "↺ Erneut bauen",
+  },
+};
 
 /** Left control column: timeline, config (planning) or stats (build), controls */
-export default function BuildHUD() {
+export default function BuildHUD({ locale }: { locale: Locale }) {
   const phase = useSimStore((s) => s.phase);
   const cursor = useSimStore((s) => s.cursor);
   const steps = useSimStore((s) => s.steps);
@@ -36,7 +77,9 @@ export default function BuildHUD() {
   const { startDelivery, startBuild, setSpeed, togglePause, reset, setCursor } =
     useSimStore();
 
-  const phaseIndex = PHASE_LABELS.findIndex((p) => p.key === phase);
+  const phaseLabels = PHASE_LABELS[locale];
+  const t = STRINGS[locale];
+  const phaseIndex = phaseLabels.findIndex((p) => p.key === phase);
   const progress = steps.length > 0 ? cursor / steps.length : 0;
   const currentStep = phase === "building" && cursor < steps.length ? steps[cursor] : null;
 
@@ -44,7 +87,7 @@ export default function BuildHUD() {
     <div className={styles.panel}>
       {/* phase timeline */}
       <nav className={styles.timeline}>
-        {PHASE_LABELS.map((p, i) => (
+        {phaseLabels.map((p, i) => (
           <div
             key={p.key}
             className={`${styles.timelineStep} ${i === phaseIndex ? styles.active : ""} ${i < phaseIndex ? styles.completed : ""}`}
@@ -56,34 +99,34 @@ export default function BuildHUD() {
       </nav>
 
       {/* planning: configuration */}
-      {phase === "planning" && <ConfigPanel />}
+      {phase === "planning" && <ConfigPanel locale={locale} />}
 
       {/* delivery/build/done: stats */}
       {phase !== "planning" && (
         <div className={styles.stats}>
           <div className={styles.statRow}>
-            <span>House type</span>
-            <strong>{HOUSE_TYPES.find((t) => t.key === houseType)?.label}</strong>
+            <span>{t.houseType}</span>
+            <strong>{HOUSE_TYPE_LABELS[locale][houseType].label}</strong>
           </div>
           <div className={styles.statRow}>
-            <span>Plates</span>
+            <span>{t.plates}</span>
             <strong>{cursor} / {steps.length}</strong>
           </div>
           <div className={styles.statRow}>
-            <span>Wood / glass</span>
+            <span>{t.woodGlass}</span>
             <strong>{design.bom.woodPlates} / {design.bom.glassPlates}</strong>
           </div>
           <div className={styles.statRow}>
-            <span>Weight</span>
+            <span>{t.weight}</span>
             <strong>{(design.bom.totalWeightKg / 1000).toFixed(1)} t</strong>
           </div>
           <div className={styles.statRow}>
-            <span>Rings</span>
+            <span>{t.rings}</span>
             <strong>{currentStep ? currentStep.ring + 1 : phase === "done" ? design.rings : 0} / {design.rings}</strong>
           </div>
           {(phase === "building" || phase === "done") && (
             <div className={styles.statRow}>
-              <span>Real build time</span>
+              <span>{t.realBuildTime}</span>
               <strong>
                 {(cursor * 0.3).toFixed(1)} h · day {Math.max(1, Math.ceil((cursor * 0.3) / 20))}
               </strong>
@@ -99,18 +142,18 @@ export default function BuildHUD() {
       <div className={styles.controls}>
         {phase === "planning" && (
           <button className={styles.primaryBtn} onClick={startDelivery}>
-            Deliver material
+            {t.deliverMaterial}
           </button>
         )}
         {phase === "delivery" && (
           <button className={styles.primaryBtn} onClick={startBuild}>
-            ▶ Start construction
+            {t.startConstruction}
           </button>
         )}
         {phase === "building" && (
           <>
             <button className={styles.secondaryBtn} onClick={togglePause}>
-              {paused ? "▶ Resume" : "❚❚ Pause"}
+              {paused ? t.resume : t.pause}
             </button>
             {[1, 3, 8].map((s) => (
               <button
@@ -125,7 +168,7 @@ export default function BuildHUD() {
         )}
         {phase === "done" && (
           <button className={styles.secondaryBtn} onClick={() => { reset(); setCursor(0); }}>
-            ↺ Build again
+            {t.buildAgain}
           </button>
         )}
       </div>
