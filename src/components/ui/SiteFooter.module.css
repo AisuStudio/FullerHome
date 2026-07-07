@@ -23,6 +23,22 @@
   font-weight: 700;
 }
 
+.collab {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin-bottom: 14px;
+}
+
+.collab a {
+  color: var(--color-text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-hazelnut);
+}
+
+.collab a:hover {
+  background: var(--color-accent);
+}
+
 .meta {
   display: flex;
   justify-content: space-between;
