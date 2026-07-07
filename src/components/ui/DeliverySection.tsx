@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import CostStructure from "./CostStructure";
+import MSCallout from "./MSCallout";
 import { Locale } from "@/lib/i18n/locale";
 import styles from "./DeliverySection.module.css";
 
@@ -179,7 +180,6 @@ const STRINGS: Record<
     projectTakts: string;
     devHead: string;
     devIntro: string;
-    creditPrefix: string;
   }
 > = {
   en: {
@@ -190,7 +190,6 @@ const STRINGS: Record<
       "Overruns can rarely be avoided entirely — least of all in procedures that " +
       "depend on authorities. What can be designed is a process that surfaces " +
       "deviations early instead of excusing them late:",
-    creditPrefix: "Project-delivery framing developed with",
   },
   de: {
     heading: "Lean Project Delivery",
@@ -201,7 +200,6 @@ const STRINGS: Record<
       "Verfahren, die von Behörden abhängen. Gestalten lässt sich aber ein " +
       "Prozess, der Abweichungen früh sichtbar macht, statt sie spät zu " +
       "entschuldigen:",
-    creditPrefix: "Bauablauf-Rahmen entwickelt mit",
   },
 };
 
@@ -308,13 +306,7 @@ export default function DeliverySection({ locale }: { locale: Locale }) {
           ))}
         </ol>
 
-        <p className={styles.credit}>
-          {t.creditPrefix}{" "}
-          <a href="https://meilestn.de/" target="_blank" rel="noopener noreferrer">
-            <strong>Meile + Stein</strong>
-          </a>
-          .
-        </p>
+        <MSCallout locale={locale} />
       </div>
     </section>
   );

@@ -10,6 +10,7 @@ import { HouseType } from "@/lib/shell/types";
 import { Locale } from "@/lib/i18n/locale";
 import { withLocale } from "@/lib/i18n/paths";
 import { HOUSE_TYPE_LABELS } from "@/lib/i18n/houseTypes";
+import MSCallout from "./MSCallout";
 import styles from "./ProcurementSection.module.css";
 
 const euro = (n: number) => "€" + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
@@ -38,7 +39,6 @@ const STRINGS: Record<
     timelineNote1: string;
     timelineNote2: string;
     disclaimer: string;
-    creditPrefix: string;
   }
 > = {
   en: {
@@ -64,7 +64,6 @@ const STRINGS: Record<
       "Net construction value approximated from the gross budget above (÷1.19 VAT, " +
       "8% planning share removed); real net-value assessment follows VgV/VOB/A " +
       "contract-splitting rules.",
-    creditPrefix: "Procurement simulation developed in collaboration with",
   },
   de: {
     heading: "Vergabe-Simulation",
@@ -89,7 +88,6 @@ const STRINGS: Record<
       "2026/2027). Der Netto-Bauwert wird aus dem obigen Bruttobudget angenähert " +
       "(÷1,19 USt., 8% Planungsanteil abgezogen); die reale Netto-Wert-Bewertung " +
       "folgt den VgV/VOB/A-Losaufteilungsregeln.",
-    creditPrefix: "Vergabe-Simulation entwickelt in Zusammenarbeit mit",
   },
 };
 
@@ -225,13 +223,7 @@ export default function ProcurementSection({ locale }: { locale: Locale }) {
 
         <p className={styles.disclaimer}>{t.disclaimer}</p>
 
-        <p className={styles.credit}>
-          {t.creditPrefix}{" "}
-          <a href="https://meilestn.de/" target="_blank" rel="noopener noreferrer">
-            <strong>Meile + Stein</strong>
-          </a>
-          .
-        </p>
+        <MSCallout locale={locale} />
       </div>
     </section>
   );
