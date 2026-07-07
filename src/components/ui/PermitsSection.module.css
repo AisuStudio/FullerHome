@@ -36,58 +36,136 @@
   background: var(--color-accent);
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.card {
-  background: rgba(255, 255, 255, 0.65);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 20px 22px;
-}
-
 .flagband {
+  display: block;
   height: 6px;
   width: 36px;
   border-radius: 2px;
   border: 1px solid var(--color-hazelnut);
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
-.card h3 {
+/* --- desktop comparison table: every row aligns across countries --- */
+
+.tableCard {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 24px 26px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.table th[scope="col"] {
+  width: 27%;
   font-family: var(--font-mono);
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--color-text);
-  margin-bottom: 4px;
+  padding-top: 0;
 }
 
-.card dl {
-  margin: 12px 0 0;
+.table th:first-child,
+.table td:first-child {
+  width: 19%;
+  padding-left: 0;
 }
 
-.card dt {
+.table tr:last-child th,
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table th[scope="row"] {
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-muted);
-  margin-top: 14px;
 }
 
-.card div:first-of-type dt {
-  margin-top: 0;
-}
-
-.card dd {
-  margin: 5px 0 0;
-  font-size: 1rem;
+.table td {
+  font-size: 0.95rem;
   line-height: 1.55;
   color: var(--color-blueberry);
+}
+
+/* --- mobile: swipeable per-country slider --- */
+
+.slider {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .tableCard {
+    display: none;
+  }
+
+  .slider {
+    display: flex;
+    gap: 14px;
+    margin: 0 -28px 20px;
+    padding: 0 28px 6px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .slide {
+    flex: 0 0 85%;
+    scroll-snap-align: start;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 20px 22px;
+  }
+
+  .slide h3 {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 4px;
+  }
+
+  .slide dl {
+    margin: 12px 0 0;
+  }
+
+  .slide dt {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+    margin-top: 14px;
+  }
+
+  .slide div:first-of-type dt {
+    margin-top: 0;
+  }
+
+  .slide dd {
+    margin: 5px 0 0;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--color-blueberry);
+  }
 }
 
 .caveat {

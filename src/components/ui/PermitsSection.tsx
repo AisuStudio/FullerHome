@@ -187,10 +187,44 @@ export default function PermitsSection({ locale }: { locale: Locale }) {
           {t.intro}
         </p>
 
-        <div className={styles.grid}>
+        {/* desktop: comparison table — every row aligns across countries */}
+        <div className={styles.tableCard}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th scope="col" />
+                {COUNTRIES[locale].map((c) => (
+                  <th scope="col" key={c.key}>
+                    <span
+                      className={styles.flagband}
+                      aria-hidden="true"
+                      style={{
+                        background: `linear-gradient(90deg, ${c.band[0]} 33%, ${c.band[1]} 33% 66%, ${c.band[2]} 66%)`,
+                      }}
+                    />
+                    {c.name}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {COUNTRIES[locale][0].rows.map((row, i) => (
+                <tr key={row.term}>
+                  <th scope="row">{row.term}</th>
+                  {COUNTRIES[locale].map((c) => (
+                    <td key={c.key}>{c.rows[i].text}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* mobile: swipeable per-country cards (scroll-snap, no JS needed) */}
+        <div className={styles.slider}>
           {COUNTRIES[locale].map((c) => (
-            <div key={c.key} className={styles.card}>
-              <div
+            <div key={c.key} className={styles.slide}>
+              <span
                 className={styles.flagband}
                 aria-hidden="true"
                 style={{
