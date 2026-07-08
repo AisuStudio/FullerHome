@@ -1,8 +1,18 @@
 import Link from "next/link";
 import Datasheet from "@/components/ui/Datasheet";
+import ImageCarousel from "@/components/ui/ImageCarousel";
+import { GEODESIC_PHOTOS } from "@/assets/geodesic";
 import { Locale } from "@/lib/i18n/locale";
 import { withLocale } from "@/lib/i18n/paths";
 import styles from "../../page.module.css";
+
+const GEODESIC_ALTS = [
+  "Ausstellungshalle der Landesgartenschau 2014, Schwäbisch Gmünd — verglaste Front, heute ein Waldpädagogik-Zentrum",
+  "Ausstellungshalle der Landesgartenschau 2014 — Eingangsbereich mit Picknicktischen",
+  "Ausstellungshalle der Landesgartenschau 2014 — Innenraum, Decke aus Buchen-Sperrholzplatten",
+  "Ausstellungshalle der Landesgartenschau 2014 — Längsseite, sechseckige Plattenverkleidung",
+  "Ausstellungshalle der Landesgartenschau 2014 — Nahaufnahme der Plattenfugen und des Dachauslasses",
+];
 
 export default function AboutContentDe({ locale }: { locale: Locale }) {
   return (
@@ -22,17 +32,11 @@ export default function AboutContentDe({ locale }: { locale: Locale }) {
         7.600 robotisch gefräste Fingerzinken-Verbindungen — nur 50&nbsp;mm dünn, dem
         Skelett eines Seeigels nachempfunden.
       </p>
-      <figure className={styles.figure}>
-        <img
-          src="https://www.itke.uni-stuttgart.de/img/gallery/LAGA/ICD_ITKE/folie36.jpg?__scale=w:880,h:660,cx:0,cy:0,cw:800,ch:600"
-          alt="Ausstellungshalle der Landesgartenschau 2014, Schwäbisch Gmünd — robotisch gefertigte Buchen-Sperrholz-Plattenschale"
-          loading="lazy"
-        />
-        <figcaption>
-          Ausstellungshalle Landesgartenschau 2014 · © ICD/ITKE Universität Stuttgart ·
-          Foto: Roland Halbe
-        </figcaption>
-      </figure>
+      <ImageCarousel
+        images={GEODESIC_PHOTOS}
+        alts={GEODESIC_ALTS}
+        caption="Ausstellungshalle Landesgartenschau 2014 · © ICD/ITKE Universität Stuttgart · Foto: Meile + Stein"
+      />
       <p>
         <strong>Die Besonderheit dieser Simulation:</strong> Statt Vorfertigung in
         einer Fabrikhalle steht der Roboter direkt auf der Baustelle. Rohplatten

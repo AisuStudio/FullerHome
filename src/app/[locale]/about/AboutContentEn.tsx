@@ -1,8 +1,18 @@
 import Link from "next/link";
 import Datasheet from "@/components/ui/Datasheet";
+import ImageCarousel from "@/components/ui/ImageCarousel";
+import { GEODESIC_PHOTOS } from "@/assets/geodesic";
 import { Locale } from "@/lib/i18n/locale";
 import { withLocale } from "@/lib/i18n/paths";
 import styles from "../../page.module.css";
+
+const GEODESIC_ALTS = [
+  "Landesgartenschau Exhibition Hall 2014, Schwäbisch Gmünd — glazed front, now in use as a forest-education center",
+  "Landesgartenschau Exhibition Hall 2014 — entrance view with picnic tables",
+  "Landesgartenschau Exhibition Hall 2014 — interior, beech plywood plate ceiling",
+  "Landesgartenschau Exhibition Hall 2014 — long side, hexagonal plate cladding",
+  "Landesgartenschau Exhibition Hall 2014 — close-up of the plate joints and roof vent",
+];
 
 export default function AboutContentEn({ locale }: { locale: Locale }) {
   return (
@@ -22,17 +32,11 @@ export default function AboutContentEn({ locale }: { locale: Locale }) {
         robotically milled finger joints — just 50&nbsp;mm thin, modeled on the
         skeleton of a sea urchin.
       </p>
-      <figure className={styles.figure}>
-        <img
-          src="https://www.itke.uni-stuttgart.de/img/gallery/LAGA/ICD_ITKE/folie36.jpg?__scale=w:880,h:660,cx:0,cy:0,cw:800,ch:600"
-          alt="Landesgartenschau Exhibition Hall 2014, Schwäbisch Gmünd — robotically fabricated beech plywood plate shell"
-          loading="lazy"
-        />
-        <figcaption>
-          Landesgartenschau Exhibition Hall 2014 · © ICD/ITKE University of Stuttgart ·
-          Photo: Roland Halbe
-        </figcaption>
-      </figure>
+      <ImageCarousel
+        images={GEODESIC_PHOTOS}
+        alts={GEODESIC_ALTS}
+        caption="Landesgartenschau Exhibition Hall 2014 · © ICD/ITKE University of Stuttgart · Photo: Meile + Stein"
+      />
       <p>
         <strong>The twist in this simulation:</strong> instead of prefabrication in a
         factory, the robot stands directly on site. Raw plates are delivered, CNC-milled
