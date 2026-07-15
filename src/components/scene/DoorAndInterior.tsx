@@ -10,6 +10,34 @@ import { LIBRARY_ELONGATION } from "@/lib/shell/generate";
 // floor and warm light, visible through door and glass plates.
 // ---------------------------------------------------------------------------
 
+interface GlassPane {
+  geo: THREE.BufferGeometry;
+  mullionX: number;
+  mullionH: number;
+}
+
+/** a single glazing pane whose top edge sits exactly on the shell's curved
+ *  cut line at both its left and right edge (a trapezoid, not a rectangle)
+ *  — adjacent panes then tile the curve as a smooth polygon instead of the
+ *  stair-stepped rectangle silhouette a flat-topped box gives. */
+function curvedPaneGeometry(
+  xLeft: number,
+  xRight: number,
+  hLeft: number,
+  hRight: number,
+  depth: number
+): THREE.BufferGeometry {
+  const shape = new THREE.Shape();
+  shape.moveTo(xLeft, 0);
+  shape.lineTo(xRight, 0);
+  shape.lineTo(xRight, hRight);
+  shape.lineTo(xLeft, hLeft);
+  shape.closePath();
+  const geo = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false });
+  geo.translate(0, 0, -depth / 2);
+  return geo;
+}
+
 export default function DoorAndInterior() {
   const design = useSimStore((s) => s.design);
   const cursor = useSimStore((s) => s.cursor);
@@ -56,6 +84,66 @@ export default function DoorAndInterior() {
   const doorH = Math.min(2.15, ph - 0.35);
   const frameT = 0.09;
 
+  // office: panorama panes cut to the circular front — each pane's left/right
+  // top corners sit exactly on the curve, so the row of panes reads as a true
+  // arc instead of a rectangular staircase.
+  const officePanes = useMemo<GlassPane[] | null>(() => {
+    if (!glassFront) return null;
+    const rc = glassFront.rc;
+    const w = 0.65;
+    const n = Math.floor((rc * 2) / w);
+    const heightAt = (x: number) => {
+      const h2 = rc * rc - x * x;
+      return h2 > 0.05 ? Math.sqrt(h2) + yOff : null;
+    };
+    const panes: GlassPane[] = [];
+    for (let i = 0; i < n; i++) {
+      const cellLeft = -rc + i * w;
+      const cellRight = cellLeft + w;
+      const paneLeft = cellLeft + 0.035;
+      const paneRight = cellRight - 0.035;
+      const hLeft = heightAt(paneLeft);
+      const hRight = heightAt(paneRight);
+      if (hLeft === null || hRight === null) continue;
+      panes.push({
+        geo: curvedPaneGeometry(paneLeft, paneRight, hLeft, hRight, 0.05),
+        mullionX: cellRight,
+        mullionH: Math.max(0.1, heightAt(cellRight) ?? 0.1),
+      });
+    }
+    return panes;
+  }, [glassFront, yOff]);
+
+  // library: same treatment for the long-side panorama window, following the
+  // elongated ellipse boundary instead of a plain circle.
+  const libraryPanes = useMemo<GlassPane[] | null>(() => {
+    if (!sideGlassFront) return null;
+    const rc = sideGlassFront.rc;
+    const halfLen = rc * elongation;
+    const w = 0.7;
+    const n = Math.floor((halfLen * 2) / w);
+    const heightAt = (x: number) => {
+      const frac = 1 - (x / halfLen) ** 2;
+      return frac > 0.02 ? rc * Math.sqrt(frac) + yOff : null;
+    };
+    const panes: GlassPane[] = [];
+    for (let i = 0; i < n; i++) {
+      const cellLeft = -halfLen + i * w;
+      const cellRight = cellLeft + w;
+      const paneLeft = cellLeft + 0.04;
+      const paneRight = cellRight - 0.04;
+      const hLeft = heightAt(paneLeft);
+      const hRight = heightAt(paneRight);
+      if (hLeft === null || hRight === null) continue;
+      panes.push({
+        geo: curvedPaneGeometry(paneLeft, paneRight, hLeft, hRight, 0.05),
+        mullionX: cellRight,
+        mullionH: Math.max(0.1, heightAt(cellRight) ?? 0.1),
+      });
+    }
+    return panes;
+  }, [sideGlassFront, yOff, elongation]);
+
   return (
     <group>
       {/* interior: wood floor (stretched along Z for the elongated library plan) */}
@@ -81,40 +169,29 @@ export default function DoorAndInterior() {
         />
       )}
 
-      {/* panorama: straight mullioned glass facade (installed near end of shell) */}
-      {glassFront && buildRatio > 0.75 && (
+      {/* panorama: mullioned glass facade cut to the circular front — each
+          pane's top corners sit on the curve, so the row reads as a true
+          arc (installed near end of shell) */}
+      {glassFront && buildRatio > 0.75 && officePanes && (
         <group position={[0, 0, glassFront.dist]}>
-          {(() => {
-            const strips: React.ReactNode[] = [];
-            const w = 0.65;
-            const n = Math.floor((glassFront.rc * 2) / w);
-            for (let i = 0; i < n; i++) {
-              const x = -glassFront.rc + w / 2 + i * w;
-              const hSq = glassFront.rc * glassFront.rc - x * x;
-              if (hSq <= 0.05) continue;
-              const h = Math.sqrt(hSq) + yOff;
-              strips.push(
-                <group key={i}>
-                  <mesh position={[x, h / 2, 0]} castShadow>
-                    <boxGeometry args={[w - 0.07, h, 0.05]} />
-                    <meshPhysicalMaterial
-                      color="#cfe4f0"
-                      transparent
-                      opacity={0.35}
-                      roughness={0.05}
-                      side={THREE.DoubleSide}
-                    />
-                  </mesh>
-                  {/* mullion */}
-                  <mesh position={[x + w / 2, (h * 0.97) / 2, 0]} castShadow>
-                    <boxGeometry args={[0.07, h * 0.97, 0.09]} />
-                    <meshStandardMaterial color="#4a3a22" roughness={0.7} />
-                  </mesh>
-                </group>
-              );
-            }
-            return strips;
-          })()}
+          {officePanes.map((p, i) => (
+            <group key={i}>
+              <mesh geometry={p.geo} castShadow>
+                <meshPhysicalMaterial
+                  color="#cfe4f0"
+                  transparent
+                  opacity={0.35}
+                  roughness={0.05}
+                  side={THREE.DoubleSide}
+                />
+              </mesh>
+              {/* mullion */}
+              <mesh position={[p.mullionX, (p.mullionH * 0.97) / 2, 0]} castShadow>
+                <boxGeometry args={[0.07, p.mullionH * 0.97, 0.09]} />
+                <meshStandardMaterial color="#4a3a22" roughness={0.7} />
+              </mesh>
+            </group>
+          ))}
           {/* base sill */}
           <mesh position={[0, 0.05, 0]} receiveShadow>
             <boxGeometry args={[glassFront.rc * 2 + 0.2, 0.1, 0.25]} />
@@ -127,40 +204,25 @@ export default function DoorAndInterior() {
           "Fensterfront an der langen Seite" giving a view out from the
           reading room, mirroring the office's straight glass front on the X
           axis instead of Z, with mullions running along the long Z side) */}
-      {sideGlassFront && buildRatio > 0.75 && (
+      {sideGlassFront && buildRatio > 0.75 && libraryPanes && (
         <group position={[sideGlassFront.dist, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
-          {(() => {
-            const halfLen = sideGlassFront.rc * elongation;
-            const strips: React.ReactNode[] = [];
-            const w = 0.7;
-            const n = Math.floor((halfLen * 2) / w);
-            for (let i = 0; i < n; i++) {
-              const xLocal = -halfLen + w / 2 + i * w;
-              // ellipse boundary: (xLocal/halfLen)^2 + (y/rc)^2 = 1
-              const frac = 1 - (xLocal / halfLen) ** 2;
-              if (frac <= 0.02) continue;
-              const h = sideGlassFront.rc * Math.sqrt(frac) + yOff;
-              strips.push(
-                <group key={i}>
-                  <mesh position={[xLocal, h / 2, 0]} castShadow>
-                    <boxGeometry args={[w - 0.08, h, 0.05]} />
-                    <meshPhysicalMaterial
-                      color="#cfe4f0"
-                      transparent
-                      opacity={0.32}
-                      roughness={0.05}
-                      side={THREE.DoubleSide}
-                    />
-                  </mesh>
-                  <mesh position={[xLocal + w / 2, (h * 0.97) / 2, 0]} castShadow>
-                    <boxGeometry args={[0.07, h * 0.97, 0.09]} />
-                    <meshStandardMaterial color="#4a3a22" roughness={0.7} />
-                  </mesh>
-                </group>
-              );
-            }
-            return strips;
-          })()}
+          {libraryPanes.map((p, i) => (
+            <group key={i}>
+              <mesh geometry={p.geo} castShadow>
+                <meshPhysicalMaterial
+                  color="#cfe4f0"
+                  transparent
+                  opacity={0.32}
+                  roughness={0.05}
+                  side={THREE.DoubleSide}
+                />
+              </mesh>
+              <mesh position={[p.mullionX, (p.mullionH * 0.97) / 2, 0]} castShadow>
+                <boxGeometry args={[0.07, p.mullionH * 0.97, 0.09]} />
+                <meshStandardMaterial color="#4a3a22" roughness={0.7} />
+              </mesh>
+            </group>
+          ))}
           <mesh position={[0, 0.05, 0]} receiveShadow>
             <boxGeometry args={[sideGlassFront.rc * elongation * 2 + 0.2, 0.1, 0.25]} />
             <meshStandardMaterial color="#4a3a22" roughness={0.7} />
